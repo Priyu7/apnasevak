@@ -129,8 +129,8 @@ class Review(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     provider_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
-   customer = db.relationship("User", foreign_keys=[user_id])
-booking = db.relationship("Booking", foreign_keys=[booking_id])
+    customer = db.relationship("User", foreign_keys="Review.user_id")
+    booking = db.relationship("Booking", foreign_keys="Review.booking_id")
 
 # ----------------- SERVICES CATALOG -----------------
 SERVICES_CATALOG = [
