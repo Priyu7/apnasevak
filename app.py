@@ -304,5 +304,4 @@ def admin_dashboard():
     return render_template("admin_dashboard.html", users=all_users, bookings=all_bookings)
 
 if __name__ == "__main__":
-    # Local development run
     app.run(debug=True, host="0.0.0.0", port=5000)
