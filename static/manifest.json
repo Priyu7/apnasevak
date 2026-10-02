@@ -1,0 +1,20 @@
+{
+  "name": "ApnaSevak - Local Home Services",
+  "short_name": "ApnaSevak",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0d6efd",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1067/1067566.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1067/1067566.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
