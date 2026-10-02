@@ -1,206 +1,399 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="container py-4">
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>स्वामी नियंत्रण कक्ष (Owner Console) | {{ t.brand_name }}</title>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <style>
+        :root {
+            --primary: #0F766E;
+            --primary-dark: #115E59;
+            --whatsapp: #25D366;
+            --bg-color: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-dark: #0F172A;
+            --text-muted: #64748B;
+            --border: #E2E8F0;
+        }
 
-    <!-- Top Owner Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
-        <div>
-            <div class="d-flex align-items-center gap-2">
-                <h3 class="fw-bold text-dark mb-0">👑 ApnaSevak Owner Central Control</h3>
-                <span class="badge bg-dark text-warning border border-warning px-2 py-1 small">SUPER ADMIN</span>
-            </div>
-            <p class="text-muted small mb-0">Master analytics & real-time monitoring of all customers, sevaks, and bookings.</p>
-        </div>
-        <a href="/logout" class="btn btn-outline-danger btn-sm px-3 rounded-2">Logout</a>
-    </div>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
 
-    <!-- Analytics Stat Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border-start border-primary border-4">
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Total Orders</small>
-                <div class="fs-3 fw-extrabold text-dark">{{ total_bookings }}</div>
-                <small class="text-primary fw-semibold">{{ pending_count }} Pending action</small>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border-start border-success border-4">
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Completed Jobs</small>
-                <div class="fs-3 fw-extrabold text-success">{{ completed_count }}</div>
-                <small class="text-muted">{{ accepted_count }} in-progress</small>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border-start border-warning border-4">
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Active Sevaks</small>
-                <div class="fs-3 fw-extrabold text-warning text-dark">{{ total_providers }}</div>
-                <small class="text-muted">Verified Specialists</small>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border-start border-info border-4">
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Registered Users</small>
-                <div class="fs-3 fw-extrabold text-info text-dark">{{ total_customers }}</div>
-                <small class="text-muted">Total Customers</small>
-            </div>
-        </div>
-    </div>
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            padding-bottom: 40px;
+        }
 
-    <!-- Master Bookings Table -->
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-5" style="border: 1px solid #e2e8f0 !important;">
-        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-            <h5 class="fw-bold mb-0 text-dark">
-                <i class="bi bi-journal-text text-primary me-2"></i>Live Master Orders Tracker
-            </h5>
-            <span class="badge bg-light text-dark border">{{ bookings|length }} Total Records</span>
+        /* Navbar */
+        .navbar {
+            background-color: #FFFFFF;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .brand-logo {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-btn-home {
+            color: var(--primary);
+            background: #F0FDFA;
+            border: 1px solid #CCFBF1;
+        }
+
+        .nav-btn-logout {
+            color: #DC2626;
+            background: #FEF2F2;
+            border: 1px solid #FEE2E2;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1100px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
+
+        /* Owner Header Banner */
+        .owner-banner {
+            background: linear-gradient(135deg, #0F766E 0%, #064E3B 100%);
+            color: white;
+            padding: 24px 28px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            box-shadow: 0 4px 14px rgba(15, 118, 110, 0.15);
+        }
+
+        .owner-tag {
+            display: inline-block;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .owner-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+        }
+
+        .founder-name {
+            color: #5EEAD4;
+            font-weight: 700;
+        }
+
+        .db-badge {
+            background: #FFFFFF;
+            color: #0F766E;
+            font-weight: 700;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Stat Counters */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .stat-val {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-top: 4px;
+        }
+
+        /* Sections & Tables */
+        .section-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .section-header {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background-color: #F1F5F9;
+            color: var(--text-muted);
+            font-weight: 700;
+            padding: 12px 14px;
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background-color: #F8FAFC;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .badge-Pending { background: #FEF3C7; color: #92400E; }
+        .badge-Accepted { background: #E0E7FF; color: #3730A3; }
+        .badge-Completed { background: #DCFCE7; color: #166534; }
+        .badge-Cancelled { background: #FEE2E2; color: #991B1B; }
+
+        .role-sevak { background: #E0F2FE; color: #0369A1; }
+        .role-customer { background: #F3E8FF; color: #6B21A8; }
+        .role-admin { background: #FEF9C3; color: #854D0E; }
+
+        /* Action Buttons */
+        .btn-wa-sm {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--whatsapp);
+            color: white;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .empty-text {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <nav class="navbar">
+        <a href="{{ url_for('index') }}" class="brand-logo">{{ t.brand_name }}</a>
+        <div class="nav-actions">
+            <a href="{{ url_for('index') }}" class="nav-btn nav-btn-home">Home</a>
+            <a href="{{ url_for('logout') }}" class="nav-btn nav-btn-logout">{{ t.logout }}</a>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <!-- Super Admin & Owner Header Banner -->
+        <div class="owner-banner">
+            <div>
+                <span class="owner-tag">👑 SUPER ADMIN & OWNER CONSOLE</span>
+                <h1 class="owner-title">स्वामी नियंत्रण कक्ष</h1>
+                <p style="margin-top: 6px; font-size: 0.95rem; opacity: 0.95;">
+                    Platform Founder & Lead Developer: <span class="founder-name">Priyanshu Sharma</span>
+                </p>
+            </div>
+            <div>
+                <span class="db-badge">🟢 Supabase PostgreSQL Active</span>
+            </div>
         </div>
 
-        <div class="card-body p-0">
+        <!-- Metrics Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Bookings</div>
+                <div class="stat-val">{{ bookings|length if bookings else 0 }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Registered Users</div>
+                <div class="stat-val">{{ users|length if users else 0 }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Live Service Platform</div>
+                <div class="stat-val" style="font-size: 1.3rem; margin-top: 10px;">{{ t.brand_name }}</div>
+            </div>
+        </div>
+
+        <!-- All Bookings Section -->
+        <div class="section-box">
+            <div class="section-header">
+                <h2>सर्व ऑर्डर्स (All Customer Bookings)</h2>
+            </div>
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr class="small text-uppercase text-muted">
-                            <th class="ps-4">Order ID & Service</th>
-                            <th>Customer Details</th>
-                            <th>Assigned Sevak</th>
-                            <th>Amount</th>
+                {% if bookings %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Phone</th>
+                            <th>Service</th>
+                            <th>Address</th>
+                            <th>Preferred Time</th>
                             <th>Status</th>
-                            <th class="text-end pe-4">Owner Action</th>
+                            <th>WhatsApp Contact</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for b in bookings %}
                         <tr>
-                            <!-- Order ID & Service Tasks -->
-                            <td class="ps-4">
-                                <span class="badge bg-secondary font-monospace mb-1">#AS-{{ b.id }}</span>
-                                <div class="fw-bold text-dark">{{ b.service_title }}</div>
-                                <small class="text-primary d-block">{{ b.selected_tasks }}</small>
-                            </td>
-
-                            <!-- Customer Info -->
+                            <td><strong>#{{ b.id }}</strong></td>
+                            <td>{{ b.customer_name }}</td>
+                            <td>{{ b.customer_phone }}</td>
+                            <td><strong>{{ b.service_name }}</strong></td>
+                            <td>{{ b.address }}</td>
+                            <td>{{ b.preferred_time }}</td>
+                            <td><span class="badge badge-{{ b.status }}">{{ b.status }}</span></td>
                             <td>
-                                <div class="fw-bold text-dark">{{ b.customer.name }}</div>
-                                <div class="small text-muted"><i class="bi bi-telephone text-success"></i> +91 {{ b.customer.phone }}</div>
-                                <small class="text-muted">{{ b.customer.email }}</small>
-                            </td>
-
-                            <!-- Provider Info -->
-                            <td>
-                                {% if b.provider %}
-                                    <div class="fw-bold text-dark">{{ b.provider.name }}</div>
-                                    <div class="small text-muted"><i class="bi bi-telephone text-success"></i> +91 {{ b.provider.phone }}</div>
-                                    <small class="badge bg-light text-dark border">{{ b.provider.skill }}</small>
-                                {% else %}
-                                    <span class="text-muted small">Not Assigned</span>
-                                {% endif %}
-                            </td>
-
-                            <!-- Amount -->
-                            <td class="fw-bold text-dark">{{ b.price }}</td>
-
-                            <!-- Live Status -->
-                            <td>
-                                {% if b.status == 'Accepted' %}
-                                    <span class="badge bg-primary px-3 py-2 fw-semibold">Accepted</span>
-                                {% elif b.status == 'Completed' %}
-                                    <span class="badge bg-success px-3 py-2 fw-semibold">Completed</span>
-                                {% elif b.status == 'Rejected' %}
-                                    <span class="badge bg-danger px-3 py-2 fw-semibold">Rejected</span>
-                                {% else %}
-                                    <span class="badge bg-warning text-dark px-3 py-2 fw-semibold">Pending</span>
-                                {% endif %}
-                            </td>
-
-                            <!-- Owner Direct Controls -->
-                            <td class="text-end pe-4">
-                                <div class="d-flex justify-content-end gap-1">
-                                    <a href="tel:+91{{ b.customer.phone }}" class="btn btn-sm btn-outline-primary" title="Call Customer">
-                                        <i class="bi bi-telephone"></i>
-                                    </a>
-                                    {% if b.provider %}
-                                    <a href="https://wa.me/91{{ b.provider.phone }}?text=Admin%20Update:%20Order%20%23AS-{{ b.id }}%20status%20check." target="_blank" class="btn btn-sm btn-outline-success" title="WhatsApp Sevak">
-                                        <i class="bi bi-whatsapp"></i>
-                                    </a>
-                                    {% endif %}
-                                    <a href="/admin/booking/delete/{{ b.id }}" onclick="return confirm('Kya aap sach me ye booking delete karna chahte hain?')" class="btn btn-sm btn-outline-danger" title="Delete Booking">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
-                                Abhi tak system me koi order generate nahi hua hai.
+                                <a href="https://wa.me/91{{ b.customer_phone }}?text=Namaste%20{{ b.customer_name }}%2C%20ApnaSevak%20se%20aapke%20order%20%23{{ b.id }}%20ke%20sambandh%20mein%20sampark%20kar%20rahe%20hain." 
+                                   target="_blank" 
+                                   class="btn-wa-sm">
+                                    WhatsApp
+                                </a>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+                {% else %}
+                <p class="empty-text">Abhi tak koi booking darj nahi hui hai.</p>
+                {% endif %}
             </div>
         </div>
+
+        <!-- All Users Section -->
+        <div class="section-box">
+            <div class="section-header">
+                <h2>पंजीकृत उपयोगकर्ता (Registered Users)</h2>
+            </div>
+            <div class="table-responsive">
+                {% if users %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Role</th>
+                            <th>Expertise / Service Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td>#{{ u.id }}</td>
+                            <td><strong>{{ u.name }}</strong></td>
+                            <td>{{ u.phone }}</td>
+                            <td><span class="badge role-{{ u.role }}">{{ u.role|capitalize }}</span></td>
+                            <td>{{ u.service_type if u.service_type else '—' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="empty-text">Koi registered user uplabdh nahi hai.</p>
+                {% endif %}
+            </div>
+        </div>
+
     </div>
 
-    <!-- Verified Sevaks & Registered Customers Quick Roster -->
-    <div class="row g-4">
-        <!-- Sevaks Directory -->
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
-                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-people-fill text-warning me-2"></i>Registered Sevaks / Partners ({{ providers|length }})</h6>
-                <div class="table-responsive" style="max-height: 250px;">
-                    <table class="table table-sm align-middle small">
-                        <thead>
-                            <tr class="text-muted">
-                                <th>Name & Skill</th>
-                                <th>Phone</th>
-                                <th>Rating</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for p in providers %}
-                            <tr>
-                                <td>
-                                    <span class="fw-bold text-dark">{{ p.name }}</span><br>
-                                    <span class="text-muted">{{ p.skill }}</span>
-                                </td>
-                                <td>+91 {{ p.phone }}</td>
-                                <td><span class="badge bg-warning text-dark">★ {{ p.rating }}</span></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+    <!-- Footer with Developer Credit -->
+    <footer style="background-color: #0F172A; color: #94A3B8; padding: 32px 20px 24px; text-align: center; border-top: 1px solid #1E293B; margin-top: 50px; font-size: 0.95rem;">
+        <div style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; align-items: center;">
+            <p style="color: #F8FAFC; font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px;">
+                {{ t.brand_name }}
+            </p>
+            <p style="color: #64748B; font-size: 0.85rem;">
+                {{ t.brand_tagline }}
+            </p>
+            <div style="margin-top: 8px; padding-top: 14px; border-top: 1px solid #1E293B; width: 100%; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+                <span>© 2026 <strong>{{ t.brand_name }}</strong>. All rights reserved.</span>
+                <span>
+                    Designed & Developed with ❤️ by 
+                    <strong style="color: #38BDF8;">Priyanshu Sharma</strong> (Founder & Lead Developer)
+                </span>
             </div>
         </div>
+    </footer>
 
-        <!-- Customers Directory -->
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
-                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-person-heart text-primary me-2"></i>Registered Customers ({{ customers|length }})</h6>
-                <div class="table-responsive" style="max-height: 250px;">
-                    <table class="table table-sm align-middle small">
-                        <thead>
-                            <tr class="text-muted">
-                                <th>Name</th>
-                                <th>Phone</th>
-                                <th>Email</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for c in customers %}
-                            <tr>
-                                <td class="fw-bold text-dark">{{ c.name }}</td>
-                                <td>+91 {{ c.phone }}</td>
-                                <td class="text-muted">{{ c.email }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
-{% endblock %}
+</body>
+</html>
