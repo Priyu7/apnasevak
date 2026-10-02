@@ -25,124 +25,67 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
-# ----------------- DUAL-LANGUAGE LOCALIZATION DICTIONARY -----------------
+# DUAL-LANGUAGE LOCALIZATION DICTIONARY
 TRANSLATIONS = {
     "hi": {
         "brand_name": "अपनासेवक",
         "brand_tagline": "घर बैठे प्रमाणित एवं विश्वसनीय सेवाएं",
         "network_tag": "सत्यापित हाइपरलोकल नेटवर्क",
         "rating_text": "4.9 रेटिंग",
-        "dispatch_text": "त्वरित सेवा",
-        "select_language_prompt": "भाषा चुनें",
-        "customer_tab": "ग्राहक (Customer)",
-        "sevak_tab": "सेवक पार्टनर",
-        "welcome": "अपनासेवक में आपका स्वागत है",
-        "login": "लॉग इन करें",
-        "signup": "नया खाता बनाएं",
-        "services": "सेवाएं",
-        "orders": "मेरे ऑर्डर",
-        "requests": "अनुरोध केरल",
-        "logout": "लॉग आउट",
-        "owner_console": "स्वामी नियंत्रण कक्ष",
-        "view_experts": "विशेषज्ञ देखें और चुनें",
-        "call": "कॉल करें",
-        "whatsapp": "व्हाट्सएप",
-        "accept": "स्वीकार करें",
-        "reject": "अस्वीकार करें",
-        "complete": "पूर्ण घोषित करें",
+        "dispatch_text": "त्वरित सेवा"
     },
     "en": {
         "brand_name": "ApnaSevak",
-        "brand_tagline": "Certified & Reliable Home Services at Your Doorstep",
+        "brand_tagline": "Verified & Trusted Home Services at Your Doorstep",
         "network_tag": "Verified Hyperlocal Network",
         "rating_text": "4.9 Rating",
-        "dispatch_text": "Instant Dispatch",
-        "select_language_prompt": "Select Language",
-        "customer_tab": "Customer",
-        "sevak_tab": "Sevak Partner",
-        "welcome": "Welcome to ApnaSevak",
-        "login": "Login",
-        "signup": "Sign Up",
-        "services": "Services",
-        "orders": "My Orders",
-        "requests": "Service Requests",
-        "logout": "Logout",
-        "owner_console": "Owner Console",
-        "view_experts": "View & Select Experts",
-        "call": "Call Now",
-        "whatsapp": "WhatsApp",
-        "accept": "Accept",
-        "reject": "Decline",
-        "complete": "Mark Completed",
+        "dispatch_text": "Quick Dispatch"
     }
 }
 
-# ----------------- DATABASE MODELS -----------------
+# --- DATABASE MODELS ---
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(20), unique=True, nullable=False)
-    password_hash = db.Column(db.String(256), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), default="customer")  # customer, sevak, admin
-    service_type = db.Column(db.String(100), nullable=True) # For sevaks: Electrician, Plumber, etc.
+    service_type = db.Column(db.String(100), nullable=True)
     is_available = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    sevak_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
-    service_name = db.Column(db.String(120), nullable=False)
-    customer_name = db.Column(db.String(120), nullable=False)
+    customer_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    customer_name = db.Column(db.String(100), nullable=False)
     customer_phone = db.Column(db.String(20), nullable=False)
     address = db.Column(db.Text, nullable=False)
-    preferred_time = db.Column(db.String(100), nullable=False)
-    status = db.Column(db.String(30), default="Pending") # Pending, Accepted, Completed, Cancelled
+    service_name = db.Column(db.String(100), nullable=False)
+    sevak_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    status = db.Column(db.String(50), default="Pending")  # Pending, Accepted, Completed, Cancelled
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    customer = db.relationship('User', foreign_keys=[customer_id], backref='customer_bookings')
-    sevak = db.relationship('User', foreign_keys=[sevak_id], backref='sevak_tasks')
-
-with app.app_context():
-    db.create_all()
-
-# ----------------- WHATSAPP UTILITY HELPER -----------------
-def generate_whatsapp_link(phone, customer_name, service_name, address, preferred_time):
-    clean_phone = "".join(filter(str.isdigit, str(phone)))
-    if len(clean_phone) == 10:
-        clean_phone = "91" + clean_phone
-    
-    msg = (
-        f"Namaste {customer_name}! 🙏\n"
-        f"ApnaSevak par aapka order praapt ho gaya hai:\n\n"
-        f"🛠️ *Seva:* {service_name}\n"
-        f"📅 *Samay:* {preferred_time}\n"
-        f"📍 *Pata:* {address}\n\n"
-        f"Aapki seva ke liye hum jald hi confirm karenge. Dhanyawad!"
-    )
-    return f"https://wa.me/{clean_phone}?text={urllib.parse.quote(msg)}"
-
-# ----------------- TEMPLATE CONTEXT PROCESSOR -----------------
+# Context processor for templates
 @app.context_processor
 def inject_translations():
     lang = session.get("lang", "hi")
-    return dict(t=TRANSLATIONS.get(lang, TRANSLATIONS["hi"]), current_lang=lang)
+    return {
+        "lang": lang,
+        "t": TRANSLATIONS.get(lang, TRANSLATIONS["hi"])
+    }
 
+# --- ROUTES ---
 @app.route("/set_language/<lang>")
 def set_language(lang):
     if lang in ["hi", "en"]:
         session["lang"] = lang
     return redirect(request.referrer or url_for("index"))
 
-# ----------------- ROUTES -----------------
 @app.route("/")
+@app.route("/home")
 def index():
     sevaks = User.query.filter_by(role="sevak", is_available=True).all()
     return render_template("index.html", sevaks=sevaks)
-
-@app.route("/home")
-def home():
-    return redirect(url_for("index"))
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -175,11 +118,7 @@ def signup():
         session["user_id"] = new_user.id
         session["user_name"] = new_user.name
         session["user_role"] = new_user.role
-
-        if new_user.role == "sevak":
-            return redirect(url_for("sevak_dashboard"))
-        elif new_user.role == "admin":
-            return redirect(url_for("admin_dashboard"))
+        flash("Registration safal raha!", "success")
         return redirect(url_for("dashboard"))
 
     return render_template("signup.html")
@@ -195,93 +134,71 @@ def login():
             session["user_id"] = user.id
             session["user_name"] = user.name
             session["user_role"] = user.role
-
-            if user.role == "sevak":
-                return redirect(url_for("sevak_dashboard"))
-            elif user.role == "admin":
-                return redirect(url_for("admin_dashboard"))
+            flash(f"Swagat hai, {user.name}!", "success")
             return redirect(url_for("dashboard"))
-        
-        flash("Galat phone number ya password.", "error")
-        return redirect(url_for("login"))
+        else:
+            flash("Galat phone number ya password.", "error")
+            return redirect(url_for("login"))
 
     return render_template("login.html")
 
 @app.route("/logout")
 def logout():
     session.clear()
+    flash("Aap safaltapurvak log out ho chuke hain.", "info")
     return redirect(url_for("index"))
 
 @app.route("/dashboard")
 def dashboard():
-    user_id = session.get("user_id")
-    if not user_id:
-        return redirect(url_for("login"))
-    
-    orders = Booking.query.filter_by(customer_id=user_id).order_by(Booking.id.desc()).all()
-    
-    # Generate WhatsApp URL for each order
-    for o in orders:
-        o.wa_link = generate_whatsapp_link(o.customer_phone, o.customer_name, o.service_name, o.address, o.preferred_time)
-
-    return render_template("dashboard.html", orders=orders)
-
-@app.route("/book", methods=["POST"])
-def book_service():
-    user_id = session.get("user_id")
-    if not user_id:
-        flash("Booking karne ke liye login karein.", "warning")
+    if "user_id" not in session:
         return redirect(url_for("login"))
 
-    service_name = request.form.get("service_name", "General Service")
-    customer_name = request.form.get("customer_name") or session.get("user_name")
-    customer_phone = request.form.get("customer_phone")
-    address = request.form.get("address")
-    preferred_time = request.form.get("preferred_time", "Jald se jald (ASAP)")
-    sevak_id = request.form.get("sevak_id")
-
-    booking = Booking(
-        customer_id=user_id,
-        sevak_id=int(sevak_id) if sevak_id else None,
-        service_name=service_name,
-        customer_name=customer_name,
-        customer_phone=customer_phone,
-        address=address,
-        preferred_time=preferred_time,
-        status="Pending"
-    )
-    db.session.add(booking)
-    db.session.commit()
-
-    # Generate instant WhatsApp redirect URL
-    wa_url = generate_whatsapp_link(customer_phone, customer_name, service_name, address, preferred_time)
-    session["last_whatsapp_url"] = wa_url
-
-    flash("Booking safaltapoorvak ho gayi!", "success")
-    return redirect(url_for("dashboard"))
-
-@app.route("/sevak_dashboard")
-def sevak_dashboard():
-    user_id = session.get("user_id")
-    if not user_id or session.get("user_role") != "sevak":
+    user = User.query.get(session["user_id"])
+    if not user:
+        session.clear()
         return redirect(url_for("login"))
 
-    assigned_orders = Booking.query.filter_by(sevak_id=user_id).order_by(Booking.id.desc()).all()
-    open_requests = Booking.query.filter_by(status="Pending", sevak_id=None).order_by(Booking.id.desc()).all()
-    
-    # WhatsApp links for contacting customers directly
-    for item in assigned_orders + open_requests:
-        item.wa_link = generate_whatsapp_link(item.customer_phone, item.customer_name, item.service_name, item.address, item.preferred_time)
+    if user.role == "sevak":
+        orders = Booking.query.filter((Booking.sevak_id == user.id) | (Booking.sevak_id == None)).order_by(Booking.id.desc()).all()
+    elif user.role == "admin":
+        return redirect(url_for("admin_dashboard"))
+    else:
+        orders = Booking.query.filter_by(customer_id=user.id).order_by(Booking.id.desc()).all()
 
-    return render_template("sevak_list.html", assigned=assigned_orders, open_reqs=open_requests)
+    return render_template("dashboard.html", user=user, orders=orders)
+
+@app.route("/gateway", methods=["GET", "POST"])
+def gateway():
+    service = request.args.get("service", "General Service")
+    if request.method == "POST":
+        customer_name = request.form.get("name", "").strip()
+        customer_phone = request.form.get("phone", "").strip()
+        address = request.form.get("address", "").strip()
+        service_name = request.form.get("service", service)
+
+        new_booking = Booking(
+            customer_id=session.get("user_id"),
+            customer_name=customer_name,
+            customer_phone=customer_phone,
+            address=address,
+            service_name=service_name,
+            status="Pending"
+        )
+        db.session.add(new_booking)
+        db.session.commit()
+        flash("Aapka order successfully book ho gaya hai!", "success")
+        return redirect(url_for("dashboard") if "user_id" in session else url_for("index"))
+
+    return render_template("gateway.html", service=service)
 
 @app.route("/update_order_status/<int:order_id>/<status>")
 def update_order_status(order_id, status):
-    user_id = session.get("user_id")
-    if not user_id:
+    if "user_id" not in session:
         return redirect(url_for("login"))
 
     booking = Booking.query.get_or_404(order_id)
+    user_id = session["user_id"]
+
     if status == "accept":
         booking.sevak_id = user_id
         booking.status = "Accepted"
@@ -307,17 +224,21 @@ def admin_dashboard():
 
     return render_template("admin_dashboard.html", users=all_users, bookings=all_bookings)
 
-# Default Sevaks ko add karne ka function
-with app.app_context():
-    db.create_all()
-    # Check karo agar sevak nahi hain toh turant add karo
-    if not User.query.filter_by(role="sevak").first():
-        s1 = User(name="Ramesh Kumar", phone="9876543210", password_hash=generate_password_hash("123456"), role="sevak", service_type="Electrician", is_available=True)
-        s2 = User(name="Suresh Sharma", phone="9876543211", password_hash=generate_password_hash("123456"), role="sevak", service_type="Plumber", is_available=True)
-        s3 = User(name="Amit Verma", phone="9876543212", password_hash=generate_password_hash("123456"), role="sevak", service_type="Carpenter", is_available=True)
-        s4 = User(name="Pooja Devi", phone="9876543213", password_hash=generate_password_hash("123456"), role="sevak", service_type="Cleaning", is_available=True)
-        db.session.add_all([s1, s2, s3, s4])
-        db.session.commit()
+# Default Sample Sevaks if database is fresh/empty
+def seed_default_services():
+    with app.app_context():
+        db.create_all()
+        if not User.query.filter_by(role="sevak").first():
+            demo_sevaks = [
+                User(name="Ramesh Kumar", phone="9876543210", password_hash=generate_password_hash("123456"), role="sevak", service_type="Electrician", is_available=True),
+                User(name="Suresh Sharma", phone="9876543211", password_hash=generate_password_hash("123456"), role="sevak", service_type="Plumber", is_available=True),
+                User(name="Amit Verma", phone="9876543212", password_hash=generate_password_hash("123456"), role="sevak", service_type="Carpenter", is_available=True),
+                User(name="Pooja Devi", phone="9876543213", password_hash=generate_password_hash("123456"), role="sevak", service_type="Cleaning", is_available=True),
+                User(name="Admin", phone="9999999999", password_hash=generate_password_hash("admin123"), role="admin", is_available=True)
+            ]
+            db.session.add_all(demo_sevaks)
+            db.session.commit()
 
 if __name__ == "__main__":
+    seed_default_services()
     app.run(debug=True, host="0.0.0.0", port=5000)
