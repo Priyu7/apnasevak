@@ -82,10 +82,13 @@ def set_language(lang):
     return redirect(request.referrer or url_for("index"))
 
 @app.route("/")
-@app.route("/home")
 def index():
     sevaks = User.query.filter_by(role="sevak", is_available=True).all()
     return render_template("index.html", sevaks=sevaks)
+
+@app.route("/home")
+def home():
+    return redirect(url_for("index"))
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -224,7 +227,7 @@ def admin_dashboard():
 
     return render_template("admin_dashboard.html", users=all_users, bookings=all_bookings)
 
-# Default Sample Sevaks if database is fresh/empty
+# Default Sample Sevaks populate karne ke liye
 def seed_default_services():
     with app.app_context():
         db.create_all()

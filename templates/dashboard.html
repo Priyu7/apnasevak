@@ -1,19 +1,16 @@
 <!DOCTYPE html>
-<html lang="{{ current_lang }}">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ t.orders }} | {{ t.brand_name }}</title>
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <title>एडमिन डैशबोर्ड (Admin Dashboard) | apnaSevak</title>
     <style>
         :root {
             --primary: #0F766E;
-            --primary-hover: #115E59;
-            --whatsapp: #25D366;
-            --whatsapp-hover: #1EBE5D;
+            --primary-dark: #115E59;
             --bg-color: #F8FAFC;
             --card-bg: #FFFFFF;
-            --text-dark: #1E293B;
+            --text-dark: #0F172A;
             --text-muted: #64748B;
             --border: #E2E8F0;
         }
@@ -31,7 +28,6 @@
             padding-bottom: 40px;
         }
 
-        /* Navbar */
         .navbar {
             background-color: #FFFFFF;
             padding: 16px 24px;
@@ -63,7 +59,6 @@
             font-weight: 600;
             padding: 8px 14px;
             border-radius: 8px;
-            transition: all 0.2s;
         }
 
         .nav-btn-home {
@@ -78,261 +73,164 @@
             border: 1px solid #FEE2E2;
         }
 
-        /* Container */
         .container {
-            max-width: 800px;
-            margin: 30px auto;
+            max-width: 1100px;
+            margin: 24px auto;
             padding: 0 16px;
         }
 
-        /* Flash Message */
-        .flash-box {
-            background-color: #ECFDF5;
-            color: #065F46;
-            border: 1px solid #A7F3D0;
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 0.95rem;
+        .header-box {
+            background: #FFFFFF;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
         }
 
-        .header-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .header-box h1 {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .section-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
             margin-bottom: 24px;
         }
 
-        .header-title {
-            font-size: 1.5rem;
+        .section-header {
+            font-size: 1.2rem;
             font-weight: 700;
-        }
-
-        /* Order Cards */
-        .order-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 20px;
-            margin-bottom: 18px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-
-        .order-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 14px rgba(0,0,0,0.05);
-        }
-
-        .order-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            border-bottom: 1px dashed var(--border);
-            padding-bottom: 12px;
             margin-bottom: 14px;
         }
 
-        .order-id {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        .service-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin-top: 2px;
-        }
-
-        /* Badges */
-        .badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .badge-Pending {
-            background-color: #FEF3C7;
-            color: #92400E;
-        }
-
-        .badge-Accepted {
-            background-color: #E0E7FF;
-            color: #3730A3;
-        }
-
-        .badge-Completed {
-            background-color: #DCFCE7;
-            color: #166534;
-        }
-
-        .badge-Cancelled {
-            background-color: #FEE2E2;
-            color: #991B1B;
-        }
-
-        /* Details Grid */
-        .details-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            font-size: 0.95rem;
-            margin-bottom: 16px;
-        }
-
-        .detail-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .detail-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-bottom: 2px;
-        }
-
-        .detail-value {
-            font-weight: 600;
-        }
-
-        /* WhatsApp Button */
-        .btn-whatsapp {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            background-color: var(--whatsapp);
-            color: #FFFFFF;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            padding: 10px 18px;
-            border-radius: 10px;
+        .table-responsive {
             width: 100%;
-            transition: background 0.2s ease;
+            overflow-x: auto;
         }
 
-        .btn-whatsapp:hover {
-            background-color: var(--whatsapp-hover);
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
         }
 
-        /* Empty State */
-        .empty-box {
-            text-align: center;
-            background: #FFFFFF;
-            padding: 48px 24px;
-            border-radius: 14px;
-            border: 1px solid var(--border);
-        }
-
-        .empty-box p {
+        th {
+            background-color: #F1F5F9;
             color: var(--text-muted);
-            margin-bottom: 18px;
+            font-weight: 700;
+            padding: 10px 12px;
+            border-bottom: 2px solid var(--border);
         }
 
-        .btn-book-now {
-            display: inline-block;
-            background-color: var(--primary);
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
             font-weight: 600;
         }
 
-        @media (max-width: 600px) {
-            .details-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        .badge-Pending { background: #FEF3C7; color: #92400E; }
+        .badge-Accepted { background: #E0E7FF; color: #3730A3; }
+        .badge-Completed { background: #DCFCE7; color: #166534; }
+        .badge-Cancelled { background: #FEE2E2; color: #991B1B; }
     </style>
 </head>
 <body>
 
-    <!-- Header Navbar -->
     <nav class="navbar">
-        <a href="{{ url_for('index') }}" class="brand-logo">{{ t.brand_name }}</a>
+        <a href="/" class="brand-logo">अपनासेवक (ApnaSevak)</a>
         <div class="nav-actions">
-            <a href="{{ url_for('index') }}" class="nav-btn nav-btn-home">Home</a>
-            <a href="{{ url_for('logout') }}" class="nav-btn nav-btn-logout">{{ t.logout }}</a>
+            <a href="/" class="nav-btn nav-btn-home">Home</a>
+            <a href="/logout" class="nav-btn nav-btn-logout">लॉग आउट</a>
         </div>
     </nav>
 
-    <!-- Main Content -->
     <div class="container">
-
-        <!-- Flash messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, msg in messages %}
-                    <div class="flash-box">
-                        <span>{{ msg }}</span>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <div class="header-section">
-            <h1 class="header-title">{{ t.orders }}</h1>
-            <a href="{{ url_for('index') }}" class="btn-book-now">+ Nayi Booking</a>
+        <div class="header-box">
+            <h1>नियंत्रण कक्ष (Admin Dashboard)</h1>
+            <span>कुल ऑर्डर्स: <strong>{{ bookings|length if bookings else 0 }}</strong></span>
         </div>
 
-        {% if orders %}
-            {% for order in orders %}
-                <div class="order-card">
-                    <div class="order-top">
-                        <div>
-                            <span class="order-id">Order #{{ order.id }}</span>
-                            <h2 class="service-title">{{ order.service_name }}</h2>
-                        </div>
-                        <span class="badge badge-{{ order.status }}">{{ order.status }}</span>
-                    </div>
-
-                    <div class="details-grid">
-                        <div class="detail-item">
-                            <span class="detail-label">Pata (Address)</span>
-                            <span class="detail-value">{{ order.address }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Samay (Preferred Time)</span>
-                            <span class="detail-value">{{ order.preferred_time }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Grahak (Customer)</span>
-                            <span class="detail-value">{{ order.customer_name }}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Phone</span>
-                            <span class="detail-value">{{ order.customer_phone }}</span>
-                        </div>
-                    </div>
-
-                    <!-- Direct WhatsApp Notification / Chat Button -->
-                    {% if order.wa_link %}
-                    <a href="{{ order.wa_link }}" target="_blank" class="btn-whatsapp">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.53 1.771.82 2.791.82 3.182 0 5.768-2.587 5.768-5.766.001-3.182-2.585-5.766-5.768-5.766zm9.969 5.766c0 5.514-4.486 10-10 10-1.742 0-3.376-.452-4.805-1.242l-5.195 1.36 1.385-5.063c-.878-1.488-1.385-3.218-1.385-5.055 0-5.514 4.486-10 10-10s10 4.486 10 10z"/>
-                        </svg>
-                        WhatsApp par Alert dekhein / Chat karein
-                    </a>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        {% else %}
-            <div class="empty-box">
-                <p>Abhi aapne koi service book nahi ki hai.</p>
-                <a href="{{ url_for('index') }}" class="btn-book-now">Pehli Seva Book Karein</a>
+        <div class="section-box">
+            <div class="section-header">सभी ऑर्डर्स (All Bookings)</div>
+            <div class="table-responsive">
+                {% if bookings %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Phone</th>
+                            <th>Service</th>
+                            <th>Address</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in bookings %}
+                        <tr>
+                            <td>#{{ b.id }}</td>
+                            <td>{{ b.customer_name }}</td>
+                            <td>{{ b.customer_phone }}</td>
+                            <td><strong>{{ b.service_name }}</strong></td>
+                            <td>{{ b.address }}</td>
+                            <td><span class="badge badge-{{ b.status }}">{{ b.status }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p style="color: var(--text-muted); text-align: center; padding: 16px;">कोई बुकिंग उपलब्ध नहीं है।</p>
+                {% endif %}
             </div>
-        {% endif %}
+        </div>
 
+        <div class="section-box">
+            <div class="section-header">पंजीकृत यूज़र्स (Registered Users)</div>
+            <div class="table-responsive">
+                {% if users %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Role</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td>#{{ u.id }}</td>
+                            <td>{{ u.name }}</td>
+                            <td>{{ u.phone }}</td>
+                            <td><strong>{{ u.role|capitalize }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p style="color: var(--text-muted); text-align: center; padding: 16px;">कोई यूज़र उपलब्ध नहीं है।</p>
+                {% endif %}
+            </div>
+        </div>
     </div>
+
+    <footer style="text-align: center; color: #94A3B8; font-size: 0.85rem; padding: 20px; border-top: 1px solid var(--border); margin-top: 40px;">
+        © 2026 अपनासेवक (ApnaSevak). All rights reserved.
+    </footer>
 
 </body>
 </html>
