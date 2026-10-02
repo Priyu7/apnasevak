@@ -9,7 +9,13 @@ from datetime import timedelta
 app = Flask(__name__)
 # Secret key configuration for sessions
 app.secret_key = os.environ.get("SECRET_KEY", "apnasevak_hyperlocal_secure_key_2026")
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///apnasevak.db")
+database_url = os.environ.get("DATABASE_URL", "sqlite:///apnasevak.db")
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql+psycopg2://", 1)
+elif database_url.startswith("postgresql://"):
+    database_url = database_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 
