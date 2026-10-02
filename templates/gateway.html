@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    body {
+        background-color: #0b0f19 !important;
+        position: relative;
+        overflow-x: hidden;
+    }
+    .ambient-glow-1 {
+        position: fixed;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(37, 99, 235, 0.28) 0%, rgba(0, 0, 0, 0) 70%);
+        top: -120px;
+        left: 50%;
+        transform: translateX(-50%);
+        pointer-events: none;
+        z-index: 0;
+        filter: blur(60px);
+    }
+    .ambient-glow-2 {
+        position: fixed;
+        width: 450px;
+        height: 450px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.16) 0%, rgba(0, 0, 0, 0) 70%);
+        bottom: -100px;
+        right: 15%;
+        pointer-events: none;
+        z-index: 0;
+        filter: blur(70px);
+    }
+    .gateway-wrapper {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 30px 16px;
+        position: relative;
+        z-index: 1;
+    }
+    .pro-frame {
+        width: 100%;
+        max-width: 450px;
+        background: rgba(255, 255, 255, 0.98);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.45);
+        border-radius: 32px;
+        overflow: hidden;
+    }
+    .pro-hero-shell {
+        background: linear-gradient(145deg, #090d16 0%, #172136 100%);
+        padding: 32px 24px 24px;
+        color: #ffffff;
+        text-align: center;
+        position: relative;
+    }
+    .live-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: rgba(34, 197, 94, 0.15);
+        color: #4ade80;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        padding: 5px 14px;
+        border-radius: 50px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+    }
+    .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #22c55e;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 8px #22c55e;
+    }
+    .metric-ribbon {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 14px;
+    }
+    .metric-pill {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        color: #e2e8f0;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .lang-capsule {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 100px;
+        padding: 4px;
+        display: inline-flex;
+        gap: 3px;
+    }
+    .lang-item {
+        padding: 4px 12px;
+        border-radius: 100px;
+        font-size: 0.74rem;
+        font-weight: 700;
+        text-decoration: none;
+        color: #64748b;
+    }
+    .lang-item.selected {
+        background: #0f172a;
+        color: #ffffff;
+    }
+    .segment-tray {
+        background: #eef2f6;
+        border-radius: 18px;
+        padding: 5px;
+        display: flex;
+        gap: 5px;
+        margin: 18px 0;
+    }
+    .segment-tab {
+        flex: 1;
+        padding: 11px 14px;
+        border-radius: 14px;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 700;
+        font-size: 0.86rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+    }
+    .segment-tab.tab-active {
+        background: #ffffff;
+        color: #0f172a;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+    .feature-panel {
+        border-radius: 18px;
+        padding: 16px 18px;
+        margin-bottom: 20px;
+    }
+    .feature-panel.customer-glow {
+        background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+        border: 1px solid #bfdbfe;
+    }
+    .feature-panel.sevak-glow {
+        background: linear-gradient(135deg, #fefce8 0%, #f8fafc 100%);
+        border: 1px solid #fef08a;
+    }
+    .btn-elevated-primary {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: #ffffff !important;
+        border-radius: 16px;
+        padding: 13px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+        box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.45);
+    }
+    .btn-elevated-dark {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: #ffffff !important;
+        border-radius: 16px;
+        padding: 13px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+        box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.4);
+    }
+    .btn-glass-subtle {
+        background: #ffffff;
+        color: #334155 !important;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 11px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+    }
+    .view-container {
+        display: none;
+    }
+    .view-container.active-stage {
+        display: block;
+    }
+</style>
+
+<div class="ambient-glow-1"></div>
+<div class="ambient-glow-2"></div>
+
+<div class="gateway-wrapper">
+    <div class="pro-frame">
+
+        <!-- Top Stage Hero -->
+        <div class="pro-hero-shell">
+            <div class="live-chip">
+                <span class="pulse-dot"></span>
+                <span>
+                    {% if current_lang == 'hi' %}सत्यापित हाइपरलोकल नेटवर्क{% else %}VERIFIED HYPERLOCAL NETWORK{% endif %}
+                </span>
+            </div>
+
+            <h2 class="fw-extrabold mb-1" style="font-size: 1.9rem; letter-spacing: -0.5px;">
+                {% if current_lang == 'hi' %}अपना<span style="color: #60a5fa;">सेवक</span>{% else %}Apna<span style="color: #60a5fa;">Sevak</span>{% endif %}
+            </h2>
+            <p class="text-white-50 small mb-0">
+                {% if current_lang == 'hi' %}घर बैठे प्रमाणित एवं विश्वसनीय सेवाएं{% else %}Doorstep Home & Wellness Services{% endif %}
+            </p>
+
+            <div class="metric-ribbon">
+                <div class="metric-pill">
+                    <i class="bi bi-star-fill text-warning"></i> 
+                    {% if current_lang == 'hi' %}4.9 रेटिंग{% else %}4.9 Rating{% endif %}
+                </div>
+                <div class="metric-pill">
+                    <i class="bi bi-lightning-charge-fill text-warning"></i> 
+                    {% if current_lang == 'hi' %}त्वरित सेवा{% else %}Express Dispatch{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 pt-3">
+
+            <!-- Language Header Switch Bar -->
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="small fw-bold text-muted" style="font-size: 0.74rem;">
+                    <i class="bi bi-translate text-primary me-1"></i>
+                    {% if current_lang == 'hi' %}भाषा चुनें{% else %}Choose Language{% endif %}
+                </span>
+                <div class="lang-capsule">
+                    <a href="/set-lang/hi" class="lang-item {% if current_lang == 'hi' %}selected{% endif %}">हिन्दी</a>
+                    <a href="/set-lang/en" class="lang-item {% if current_lang == 'en' %}selected{% endif %}">English</a>
+                </div>
+            </div>
+
+            <!-- Segment Selector Slider -->
+            <div class="segment-tray">
+                <button type="button" class="segment-tab tab-active" id="tabCustomer" onclick="activateRole('customer')">
+                    <i class="bi bi-person-heart text-primary"></i> 
+                    {% if current_lang == 'hi' %}ग्राहक (Customer){% else %}Customer{% endif %}
+                </button>
+                <button type="button" class="segment-tab" id="tabSevak" onclick="activateRole('sevak')">
+                    <i class="bi bi-tools text-warning"></i> 
+                    {% if current_lang == 'hi' %}सेवक पार्टनर{% else %}Sevak Partner{% endif %}
+                </button>
+            </div>
+
+            <!-- 1. Customer View Stage -->
+            <div class="view-container active-stage" id="stageCustomer">
+                <div class="feature-panel customer-glow">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <span class="fw-extrabold text-dark small">
+                            <i class="bi bi-patch-check-fill text-primary me-1"></i> 
+                            {% if current_lang == 'hi' %}घर बैठे त्वरित सेवाएं{% else %}On-Demand At Home{% endif %}
+                        </span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-0" style="font-size: 0.68rem;">
+                            {% if current_lang == 'hi' %}सत्यापित{% else %}Verified{% endif %}
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-0" style="font-size: 0.8rem; line-height: 1.4;">
+                        {% if current_lang == 'hi' %}
+                        इलेक्ट्रीशियन, प्लंबर, एसी रिपेयर, सैलून एवं स्पा विशेषज्ञ सीधे आपके घर पधारेंगे।
+                        {% else %}
+                        Electrician, Plumber, AC Repair, Salon & Spa experts ready to visit your doorstep.
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <a href="/login?role=customer" class="btn-elevated-primary">
+                        {% if current_lang == 'hi' %}ग्राहक के रूप में लॉग इन करें &rarr;{% else %}Sign In as Customer &rarr;{% endif %}
+                    </a>
+                    <a href="/signup?role=customer" class="btn-glass-subtle">
+                        {% if current_lang == 'hi' %}नया ग्राहक खाता बनाएं{% else %}Create New Customer Account{% endif %}
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. Sevak View Stage -->
+            <div class="view-container" id="stageSevak">
+                <div class="feature-panel sevak-glow">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <span class="fw-extrabold text-dark small">
+                            <i class="bi bi-wallet2 text-success me-1"></i> 
+                            {% if current_lang == 'hi' %}दैनिक कमाई और स्वतंत्रता{% else %}Daily Payouts & Freedom{% endif %}
+                        </span>
+                        <span class="badge bg-warning bg-opacity-25 text-dark border border-warning px-2 py-0" style="font-size: 0.68rem;">
+                            {% if current_lang == 'hi' %}पार्टनर सुविधा{% else %}Partner Perks{% endif %}
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-0" style="font-size: 0.8rem; line-height: 1.4;">
+                        {% if current_lang == 'hi' %}
+                        पास के नए कार्य ऑर्डर स्वीकार करें, गूगल मैप्स से रास्ता देखें और अपनी दैनिक आय बढ़ाएं।
+                        {% else %}
+                        Accept nearby service requests, get directions via Google Maps, and grow daily income.
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <a href="/login?role=provider" class="btn-elevated-dark">
+                        {% if current_lang == 'hi' %}सेवक पार्टनर लॉग इन करें &rarr;{% else %}Partner Duty Login &rarr;{% endif %}
+                    </a>
+                    <a href="/signup?role=provider" class="btn-glass-subtle">
+                        {% if current_lang == 'hi' %}प्रमाणित सेवक के रूप में जुड़ें{% else %}Register as Certified Sevak{% endif %}
+                    </a>
+                </div>
+            </div>
+
+            <!-- Super Admin Link -->
+            <div class="text-center mt-4 pt-2 border-top">
+                <a href="/login" class="text-muted text-decoration-none small" style="font-size: 0.74rem;">
+                    <i class="bi bi-shield-lock-fill text-warning me-1"></i> 
+                    {% if current_lang == 'hi' %}प्लेटफॉर्म व्यवस्थापक (एडमिन) कंसोल &rarr;{% else %}Platform Admin / Owner Console &rarr;{% endif %}
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function activateRole(role) {
+        const tabCustomer = document.getElementById("tabCustomer");
+        const tabSevak = document.getElementById("tabSevak");
+        const stageCustomer = document.getElementById("stageCustomer");
+        const stageSevak = document.getElementById("stageSevak");
+
+        if (role === 'customer') {
+            tabCustomer.classList.add("tab-active");
+            tabSevak.classList.remove("tab-active");
+            stageCustomer.classList.add("active-stage");
+            stageSevak.classList.remove("active-stage");
+        } else {
+            tabSevak.classList.add("tab-active");
+            tabCustomer.classList.remove("tab-active");
+            stageSevak.classList.add("active-stage");
+            stageCustomer.classList.remove("active-stage");
+        }
+    }
+</script>
+{% endblock %}

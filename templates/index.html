@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+
+    <!-- Section Heading -->
+    <div class="mb-4">
+        <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-1 rounded-pill small mb-2">
+            {{ t.curated_services }}
+        </span>
+        <h2 class="fw-extrabold text-dark display-6 mb-2">{{ t.catalog_title }}</h2>
+        <p class="text-muted">{{ t.catalog_subtitle }}</p>
+    </div>
+
+    <!-- Services Grid -->
+    <div class="row g-4">
+        {% for s in services %}
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white d-flex flex-column" style="border: 1px solid #e2e8f0 !important;">
+                
+                <!-- Category Tag & Icon -->
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="bg-light text-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 46px; height: 46px; font-size: 1.25rem;">
+                        <i class="bi bi-tools"></i>
+                    </div>
+                    <span class="badge bg-light text-dark border px-2 py-1 small">{{ s.category }}</span>
+                </div>
+
+                <!-- Title & Description -->
+                <h5 class="fw-bold text-dark mb-2">{{ s.title }}</h5>
+                <p class="text-muted small mb-3 flex-grow-1" style="line-height: 1.4;">{{ s.desc }}</p>
+
+                <!-- Popular Subtasks Included -->
+                <div class="bg-light p-2 rounded-3 mb-3 border">
+                    <small class="text-muted text-uppercase fw-bold d-block mb-1" style="font-size: 0.65rem;">{{ t.popular_includes }}</small>
+                    <ul class="list-unstyled mb-0 small text-dark" style="font-size: 0.75rem;">
+                        {% for task in s.tasks[:2] %}
+                            <li>• {{ task }}</li>
+                        {% endfor %}
+                        {% if s.tasks|length > 2 %}
+                            <li class="text-primary fw-semibold mt-1">{{ t.more_tasks }}</li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <!-- Price & Action Button -->
+                <div class="pt-2 border-top mt-auto">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <small class="text-muted">{{ t.standard_rate }}</small>
+                        <span class="fw-bold text-dark fs-5">{{ s.price }}</span>
+                    </div>
+                    <a href="/service/{{ s.key }}/providers" class="btn btn-custom-primary w-100 fw-semibold py-2">
+                        {{ t.view_experts }}
+                    </a>
+                </div>
+
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <p class="text-muted">No services found matching your query.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

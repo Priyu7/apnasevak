@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+
+    <!-- Top Owner Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <div>
+            <div class="d-flex align-items-center gap-2">
+                <h3 class="fw-bold text-dark mb-0">👑 ApnaSevak Owner Central Control</h3>
+                <span class="badge bg-dark text-warning border border-warning px-2 py-1 small">SUPER ADMIN</span>
+            </div>
+            <p class="text-muted small mb-0">Master analytics & real-time monitoring of all customers, sevaks, and bookings.</p>
+        </div>
+        <a href="/logout" class="btn btn-outline-danger btn-sm px-3 rounded-2">Logout</a>
+    </div>
+
+    <!-- Analytics Stat Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border-start border-primary border-4">
+                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Total Orders</small>
+                <div class="fs-3 fw-extrabold text-dark">{{ total_bookings }}</div>
+                <small class="text-primary fw-semibold">{{ pending_count }} Pending action</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border-start border-success border-4">
+                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Completed Jobs</small>
+                <div class="fs-3 fw-extrabold text-success">{{ completed_count }}</div>
+                <small class="text-muted">{{ accepted_count }} in-progress</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border-start border-warning border-4">
+                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Active Sevaks</small>
+                <div class="fs-3 fw-extrabold text-warning text-dark">{{ total_providers }}</div>
+                <small class="text-muted">Verified Specialists</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border-start border-info border-4">
+                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Registered Users</small>
+                <div class="fs-3 fw-extrabold text-info text-dark">{{ total_customers }}</div>
+                <small class="text-muted">Total Customers</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Master Bookings Table -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-5" style="border: 1px solid #e2e8f0 !important;">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-journal-text text-primary me-2"></i>Live Master Orders Tracker
+            </h5>
+            <span class="badge bg-light text-dark border">{{ bookings|length }} Total Records</span>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr class="small text-uppercase text-muted">
+                            <th class="ps-4">Order ID & Service</th>
+                            <th>Customer Details</th>
+                            <th>Assigned Sevak</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Owner Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in bookings %}
+                        <tr>
+                            <!-- Order ID & Service Tasks -->
+                            <td class="ps-4">
+                                <span class="badge bg-secondary font-monospace mb-1">#AS-{{ b.id }}</span>
+                                <div class="fw-bold text-dark">{{ b.service_title }}</div>
+                                <small class="text-primary d-block">{{ b.selected_tasks }}</small>
+                            </td>
+
+                            <!-- Customer Info -->
+                            <td>
+                                <div class="fw-bold text-dark">{{ b.customer.name }}</div>
+                                <div class="small text-muted"><i class="bi bi-telephone text-success"></i> +91 {{ b.customer.phone }}</div>
+                                <small class="text-muted">{{ b.customer.email }}</small>
+                            </td>
+
+                            <!-- Provider Info -->
+                            <td>
+                                {% if b.provider %}
+                                    <div class="fw-bold text-dark">{{ b.provider.name }}</div>
+                                    <div class="small text-muted"><i class="bi bi-telephone text-success"></i> +91 {{ b.provider.phone }}</div>
+                                    <small class="badge bg-light text-dark border">{{ b.provider.skill }}</small>
+                                {% else %}
+                                    <span class="text-muted small">Not Assigned</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Amount -->
+                            <td class="fw-bold text-dark">{{ b.price }}</td>
+
+                            <!-- Live Status -->
+                            <td>
+                                {% if b.status == 'Accepted' %}
+                                    <span class="badge bg-primary px-3 py-2 fw-semibold">Accepted</span>
+                                {% elif b.status == 'Completed' %}
+                                    <span class="badge bg-success px-3 py-2 fw-semibold">Completed</span>
+                                {% elif b.status == 'Rejected' %}
+                                    <span class="badge bg-danger px-3 py-2 fw-semibold">Rejected</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark px-3 py-2 fw-semibold">Pending</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Owner Direct Controls -->
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-1">
+                                    <a href="tel:+91{{ b.customer.phone }}" class="btn btn-sm btn-outline-primary" title="Call Customer">
+                                        <i class="bi bi-telephone"></i>
+                                    </a>
+                                    {% if b.provider %}
+                                    <a href="https://wa.me/91{{ b.provider.phone }}?text=Admin%20Update:%20Order%20%23AS-{{ b.id }}%20status%20check." target="_blank" class="btn btn-sm btn-outline-success" title="WhatsApp Sevak">
+                                        <i class="bi bi-whatsapp"></i>
+                                    </a>
+                                    {% endif %}
+                                    <a href="/admin/booking/delete/{{ b.id }}" onclick="return confirm('Kya aap sach me ye booking delete karna chahte hain?')" class="btn btn-sm btn-outline-danger" title="Delete Booking">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                Abhi tak system me koi order generate nahi hua hai.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verified Sevaks & Registered Customers Quick Roster -->
+    <div class="row g-4">
+        <!-- Sevaks Directory -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-people-fill text-warning me-2"></i>Registered Sevaks / Partners ({{ providers|length }})</h6>
+                <div class="table-responsive" style="max-height: 250px;">
+                    <table class="table table-sm align-middle small">
+                        <thead>
+                            <tr class="text-muted">
+                                <th>Name & Skill</th>
+                                <th>Phone</th>
+                                <th>Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in providers %}
+                            <tr>
+                                <td>
+                                    <span class="fw-bold text-dark">{{ p.name }}</span><br>
+                                    <span class="text-muted">{{ p.skill }}</span>
+                                </td>
+                                <td>+91 {{ p.phone }}</td>
+                                <td><span class="badge bg-warning text-dark">★ {{ p.rating }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customers Directory -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-person-heart text-primary me-2"></i>Registered Customers ({{ customers|length }})</h6>
+                <div class="table-responsive" style="max-height: 250px;">
+                    <table class="table table-sm align-middle small">
+                        <thead>
+                            <tr class="text-muted">
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in customers %}
+                            <tr>
+                                <td class="fw-bold text-dark">{{ c.name }}</td>
+                                <td>+91 {{ c.phone }}</td>
+                                <td class="text-muted">{{ c.email }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

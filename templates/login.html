@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    /* Full Page Ambient Background */
+    .login-stage {
+        min-height: calc(100vh - 120px);
+        background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0b0f19 100%) !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 30px 16px;
+        position: relative;
+        overflow: hidden;
+    }
+    .ambient-glow-login {
+        position: absolute;
+        width: 460px;
+        height: 460px;
+        background: radial-gradient(circle, rgba(37, 99, 235, 0.3) 0%, rgba(0,0,0,0) 70%);
+        top: -80px;
+        left: 50%;
+        transform: translateX(-50%);
+        pointer-events: none;
+    }
+    .pro-login-card {
+        width: 100%;
+        max-width: 440px;
+        background: #ffffff;
+        border-radius: 28px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        position: relative;
+        z-index: 2;
+    }
+    .pro-login-header {
+        background: linear-gradient(135deg, #090d16 0%, #1a2234 100%);
+        padding: 32px 24px 24px;
+        text-align: center;
+        color: #ffffff;
+    }
+    .role-badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 14px;
+        border-radius: 50px;
+        font-size: 0.74rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+    }
+    .badge-customer {
+        background: rgba(37, 99, 235, 0.2);
+        color: #93c5fd;
+        border: 1px solid rgba(37, 99, 235, 0.4);
+    }
+    .badge-provider {
+        background: rgba(245, 158, 11, 0.2);
+        color: #fde047;
+        border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+    .badge-admin {
+        background: rgba(239, 68, 68, 0.2);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+    .login-btn-action {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: #ffffff !important;
+        border-radius: 14px;
+        padding: 13px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        border: none;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 8px 20px -3px rgba(37, 99, 235, 0.45);
+        transition: transform 0.2s ease;
+    }
+    .login-btn-action:hover {
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="login-stage">
+    <div class="ambient-glow-login"></div>
+
+    <div class="pro-login-card">
+        
+        <!-- Header -->
+        <div class="pro-login-header">
+            <div class="role-badge-pill {% if role == 'provider' %}badge-provider{% elif role == 'admin' %}badge-admin{% else %}badge-customer{% endif %}">
+                <i class="bi {% if role == 'provider' %}bi-tools{% elif role == 'admin' %}bi-shield-lock-fill{% else %}bi-person-circle{% endif %}"></i>
+                <span>
+                    {% if current_lang == 'hi' %}
+                        {% if role == 'provider' %}सेवक पार्टनर ड्यूटी प्रवेश{% elif role == 'admin' %}व्यवस्थापक नियंत्रण कक्ष{% else %}ग्राहक खाता प्रवेश{% endif %}
+                    {% else %}
+                        {% if role == 'provider' %}Partner Duty Access{% elif role == 'admin' %}Master Admin Panel{% else %}Customer Portal Access{% endif %}
+                    {% endif %}
+                </span>
+            </div>
+
+            <h3 class="fw-bold mb-1" style="font-size: 1.75rem;">
+                {% if current_lang == 'hi' %}लॉग इन करें{% else %}Welcome Back{% endif %}
+            </h3>
+            <p class="text-white-50 small mb-0">
+                {% if current_lang == 'hi' %}अपनासेवक में आपका स्वागत है{% else %}Enter your credentials to continue{% endif %}
+            </p>
+        </div>
+
+        <!-- Form Body -->
+        <div class="p-4 pt-3">
+            <form action="/login" method="POST">
+                
+                <div class="mb-3 text-start">
+                    <label class="form-label small fw-bold text-dark mb-1">
+                        {% if current_lang == 'hi' %}ईमेल पता{% else %}Email Address{% endif %}
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0" style="border-radius: 14px 0 0 14px;">
+                            <i class="bi bi-envelope text-muted"></i>
+                        </span>
+                        <input type="email" name="email" class="form-control bg-light border-start-0 py-2" placeholder="name@example.com" style="border-radius: 0 14px 14px 0;" required autofocus>
+                    </div>
+                </div>
+
+                <div class="mb-4 text-start">
+                    <label class="form-label small fw-bold text-dark mb-1">
+                        {% if current_lang == 'hi' %}पासवर्ड{% else %}Password{% endif %}
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0" style="border-radius: 14px 0 0 14px;">
+                            <i class="bi bi-key text-muted"></i>
+                        </span>
+                        <input type="password" name="password" class="form-control bg-light border-start-0 py-2" placeholder="••••••••" style="border-radius: 0 14px 14px 0;" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn-action">
+                    <span>{% if current_lang == 'hi' %}लॉग इन करें{% else %}Sign In Securely{% endif %}</span>
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="text-center mt-4 pt-2 border-top">
+                <p class="text-muted small mb-0">
+                    {% if current_lang == 'hi' %}खाता नहीं है?{% else %}Don't have an account?{% endif %}
+                    <a href="/signup?role={{ role }}" class="text-primary text-decoration-none fw-bold ms-1">
+                        {% if current_lang == 'hi' %}नया खाता बनाएं &rarr;{% else %}Sign Up &rarr;{% endif %}
+                    </a>
+                </p>
+            </div>
+
+            <div class="text-center mt-2">
+                <a href="/" class="text-muted text-decoration-none small" style="font-size: 0.75rem;">
+                    &larr; {% if current_lang == 'hi' %}मुख्य द्वार पर वापस जाएं{% else %}Back to portal selection{% endif %}
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
