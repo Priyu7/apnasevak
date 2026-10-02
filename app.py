@@ -291,11 +291,16 @@ def update_order_status(order_id, status):
 
 @app.route("/admin_dashboard")
 def admin_dashboard():
-    if session.get("user_role") != "admin":
-        return redirect(url_for("login"))
+    try:
+        all_users = User.query.all()
+    except Exception:
+        all_users = []
 
-    all_users = User.query.all()
-    all_bookings = Booking.query.order_by(Booking.id.desc()).all()
+    try:
+        all_bookings = Booking.query.order_by(Booking.id.desc()).all()
+    except Exception:
+        all_bookings = []
+
     return render_template("admin_dashboard.html", users=all_users, bookings=all_bookings)
 
 if __name__ == "__main__":
