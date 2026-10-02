@@ -140,6 +140,10 @@ def index():
     sevaks = User.query.filter_by(role="sevak", is_available=True).all()
     return render_template("index.html", sevaks=sevaks)
 
+@app.route("/home")
+def home():
+    return redirect(url_for("index"))
+
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
@@ -290,6 +294,7 @@ def update_order_status(order_id, status):
     return redirect(request.referrer or url_for("dashboard"))
 
 @app.route("/admin_dashboard")
+@app.route("/admin_dashboard")
 def admin_dashboard():
     try:
         all_users = User.query.all()
@@ -302,6 +307,17 @@ def admin_dashboard():
         all_bookings = []
 
     return render_template("admin_dashboard.html", users=all_users, bookings=all_bookings)
+
+with app.app_context():
+    db.create_all()
+    if not User.query.filter_by(role="sevak").first():
+        db.session.add_all([
+            User(name="Ramesh Kumar", phone="9876543210", password_hash=generate_password_hash("123456"), role="sevak", service_type="Electrician", is_available=True),
+            User(name="Suresh Sharma", phone="9876543211", password_hash=generate_password_hash("123456"), role="sevak", service_type="Plumber", is_available=True),
+            User(name="Amit Verma", phone="9876543212", password_hash=generate_password_hash("123456"), role="sevak", service_type="Carpenter", is_available=True),
+            User(name="Pooja Devi", phone="9876543213", password_hash=generate_password_hash("123456"), role="sevak", service_type="Cleaning", is_available=True)
+        ])
+        db.session.commit()
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
