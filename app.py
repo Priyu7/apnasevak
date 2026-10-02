@@ -1,3 +1,4 @@
+import random
 import os
 import webbrowser
 from threading import Timer
@@ -495,6 +496,65 @@ def login():
         return "Invalid Credentials! <a href='/login'>Try again</a>"
 
     return render_template("login.html", role=preselected_role)
+
+@app.route("/forgot_password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        phone = request.form.get("phone", "").strip()
+        user = User.query.filter_by(phone=phone).first()
+        
+        if not user:
+            flash("Is number par koi account registered nahi hai.", "error")
+            return redirect(url_for("forgot_password"))
+            
+        # 4 digit professional OTP generate
+        otp = str(random.randint(1000, 9999))
+        session["reset_phone"] = phone
+        session["reset_otp"] = otp
+        
+        flash(f"Verification OTP bhej diya gaya hai: {otp}", "success")
+        return redirect(url_for("reset_password"))
+        
+    return render_template("forgot_password.html", step="request_otp")
+
+@app.route("/reset_password", methods=["GET", "POST"])
+def reset_password():
+    phone = session.get("reset_phone")
+    expected_otp = session.get("reset_otp")
+    
+    if not phone or not expected_otp:
+        flash("Kripya pehle apna mobile number enter karein.", "error")
+        return redirect(url_for("forgot_password"))
+        
+    if request.method == "POST":
+        entered_otp = request.form.get("otp", "").strip()
+        new_password = request.form.get("new_password", "").strip()
+        confirm_password = request.form.get("confirm_password", "").strip()
+        
+        if entered_otp != expected_otp:
+            flash("Amanaya OTP! Kripya sahi code enter karein.", "error")
+            return render_template("forgot_password.html", step="verify_otp", phone=phone)
+            
+        if len(new_password) < 4:
+            flash("Naya password kam se kam 4 aksharo ka hona chahiye.", "error")
+            return render_template("forgot_password.html", step="verify_otp", phone=phone)
+            
+        if new_password != confirm_password:
+            flash("Dono password match nahi kar rahe hain.", "error")
+            return render_template("forgot_password.html", step="verify_otp", phone=phone)
+            
+        user = User.query.filter_by(phone=phone).first()
+        if user:
+            user.password_hash = generate_password_hash(new_password)
+            db.session.commit()
+            
+            session.pop("reset_phone", None)
+            session.pop("reset_otp", None)
+            
+            flash("Password safaltapurvak badal gaya hai! Naye password se login karein.", "success")
+            return redirect(url_for("login"))
+            
+    return render_template("forgot_password.html", step="verify_otp", phone=phone)
 
 @app.route("/dashboard")
 def dashboard():

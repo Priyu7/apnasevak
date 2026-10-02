@@ -140,6 +140,11 @@
                         <input type="password" name="password" class="form-control bg-light border-start-0 py-2" placeholder="••••••••" style="border-radius: 0 14px 14px 0;" required>
                     </div>
                 </div>
+                <div class="d-flex justify-content-end mb-3 mt-1">
+    <a href="/forgot_password" class="text-decoration-none small text-muted fw-semibold">
+        {% if current_lang == 'hi' %}पासवर्ड भूल गए?{% else %}Forgot Password?{% endif %}
+    </a>
+</div>
 
                 <button type="submit" class="login-btn-action">
                     <span>{% if current_lang == 'hi' %}लॉग इन करें{% else %}Sign In Securely{% endif %}</span>
