@@ -1,6 +1,5 @@
 import os
 import webbrowser
-import urllib.parse
 from threading import Timer
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, session, flash
@@ -43,6 +42,13 @@ TRANSLATIONS = {
     }
 }
 
+DEFAULT_SERVICES = [
+    {"name": "Electrician", "icon": "⚡", "desc": "Wire fixing, fan repair, switchboard installation"},
+    {"name": "Plumber", "icon": "🔧", "desc": "Pipe leakage, tap fitting, bathroom maintenance"},
+    {"name": "Carpenter", "icon": "🪚", "desc": "Furniture repair, door locks, woodwork"},
+    {"name": "Cleaning", "icon": "🧹", "desc": "Deep home cleaning, kitchen & bathroom cleaning"}
+]
+
 # --- DATABASE MODELS ---
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -65,7 +71,6 @@ class Booking(db.Model):
     status = db.Column(db.String(50), default="Pending")  # Pending, Accepted, Completed, Cancelled
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Context processor for templates
 @app.context_processor
 def inject_translations():
     lang = session.get("lang", "hi")
@@ -83,8 +88,11 @@ def set_language(lang):
 
 @app.route("/")
 def index():
-    sevaks = User.query.filter_by(role="sevak", is_available=True).all()
-    return render_template("index.html", sevaks=sevaks)
+    try:
+        sevaks = User.query.filter_by(role="sevak", is_available=True).all()
+    except Exception:
+        sevaks = []
+    return render_template("index.html", sevaks=sevaks, services=DEFAULT_SERVICES)
 
 @app.route("/home")
 def home():
@@ -189,10 +197,19 @@ def gateway():
         )
         db.session.add(new_booking)
         db.session.commit()
-        flash("Aapka order successfully book ho gaya hai!", "success")
+        flash("Aapka order book ho gaya!", "success")
         return redirect(url_for("dashboard") if "user_id" in session else url_for("index"))
 
     return render_template("gateway.html", service=service)
+
+@app.route("/sevaks")
+def sevak_list():
+    service_type = request.args.get("service")
+    if service_type:
+        sevaks = User.query.filter_by(role="sevak", service_type=service_type, is_available=True).all()
+    else:
+        sevaks = User.query.filter_by(role="sevak", is_available=True).all()
+    return render_template("sevak_list.html", sevaks=sevaks, service_type=service_type)
 
 @app.route("/update_order_status/<int:order_id>/<status>")
 def update_order_status(order_id, status):
@@ -227,8 +244,7 @@ def admin_dashboard():
 
     return render_template("admin_dashboard.html", users=all_users, bookings=all_bookings)
 
-# Default Sample Sevaks populate karne ke liye
-def seed_default_services():
+def init_db_and_seed():
     with app.app_context():
         db.create_all()
         if not User.query.filter_by(role="sevak").first():
@@ -242,6 +258,7 @@ def seed_default_services():
             db.session.add_all(demo_sevaks)
             db.session.commit()
 
+init_db_and_seed()
+
 if __name__ == "__main__":
-    seed_default_services()
     app.run(debug=True, host="0.0.0.0", port=5000)
