@@ -1,9 +1,0 @@
-{
-  "short_name": "apnaSevak",
-  "name": "apnaSevak - Gharelu Sevaayein",
-  "icons": [],
-  "start_url": "/",
-  "background_color": "#F8FAFC",
-  "theme_color": "#0284C7",
-  "display": "standalone"
-}

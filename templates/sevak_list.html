@@ -1,15 +1,199 @@
 {% extends "base.html" %}
-
 {% block content %}
-<h2 style="font-size: 1.5rem; color: #0284C7; margin-bottom: 20px;">उपलब्ध सेवा प्रदाता</h2>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
-    {% for s in sevaks %}
-    <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 10px; padding: 18px;">
-        <h3 style="font-size: 1.1rem; color: #0F172A;">{{ s.name }}</h3>
-        <p style="color: #0F766E; font-weight: 600;">{{ s.service_type }}</p>
-        <p style="color: #64748B; font-size: 0.9rem; margin: 8px 0;">Phone: {{ s.phone }}</p>
-        <a href="/gateway?service={{ s.service_type }}" style="display: inline-block; background: #0284C7; color: #fff; padding: 6px 14px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">Book Now</a>
+<div class="container py-5">
+
+    <div class="mb-4">
+        <a href="/home" class="text-decoration-none text-muted small fw-semibold">
+            &larr; {% if current_lang == 'hi' %}सभी सेवाओं पर वापस जाएं{% else %}Back to all services{% endif %}
+        </a>
+        <div class="d-flex align-items-center justify-content-between mt-2 flex-wrap gap-2">
+            <div>
+                <h2 class="fw-extrabold text-dark mb-1">
+                    {% if current_lang == 'hi' %}
+                        उपलब्ध कुशल विशेषज्ञ: {{ service.title }}
+                    {% else %}
+                        Available Verified Experts: {{ service.title }}
+                    {% endif %}
+                </h2>
+                <p class="text-muted small mb-0">
+                    {% if current_lang == 'hi' %}
+                        अपने पसंदीदा प्रमाणित सेवक का चयन करें एवं समय निर्धारित करें।
+                    {% else %}
+                        Choose your preferred specialist, customize tasks and schedule a doorstep visit.
+                    {% endif %}
+                </p>
+            </div>
+            <span class="badge bg-primary bg-opacity-10 text-primary border px-3 py-2 fw-bold">
+                {% if current_lang == 'hi' %}मानक दर: {{ service.price }}{% else %}Standard Rate: {{ service.price }}{% endif %}
+            </span>
+        </div>
     </div>
-    {% endfor %}
+
+    <div class="row g-4">
+        {% for sevak in sevaks %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white" style="border: 1px solid #e2e8f0 !important;">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                        {{ sevak.name[0] }}
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">{{ sevak.name }}</h5>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-0 small">
+                            <i class="bi bi-patch-check-fill me-1"></i>
+                            {% if current_lang == 'hi' %}प्रमाणित सेवक{% else %}Verified Partner{% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between py-2 border-top border-bottom mb-3 text-muted small">
+                    <span>
+                        <i class="bi bi-star-fill text-warning"></i> 
+                        <strong>{{ sevak.rating }}</strong> 
+                        ({% if current_lang == 'hi' %}{{ sevak.rating_count }} समीक्षाएं{% else %}{{ sevak.rating_count }} reviews{% endif %})
+                    </span>
+                    <span>
+                        <i class="bi bi-briefcase text-secondary"></i> 
+                        {% if current_lang == 'hi' %}{{ sevak.experience }} अनुभव{% else %}{{ sevak.experience }} exp{% endif %}
+                    </span>
+                </div>
+
+                <button type="button" class="btn btn-custom-primary w-100 fw-semibold py-2" data-bs-toggle="modal" data-bs-target="#bookModal{{ sevak.id }}">
+                    {% if current_lang == 'hi' %}सेवक का चयन करें &rarr;{% else %}Choose Specialist &rarr;{% endif %}
+                </button>
+            </div>
+        </div>
+
+        <div class="modal fade" id="bookModal{{ sevak.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow-lg">
+                    <div class="modal-header border-bottom">
+                        <h5 class="modal-title fw-bold text-dark">
+                            {% if current_lang == 'hi' %}
+                                {{ sevak.name }} के साथ समय तय करें
+                            {% else %}
+                                Schedule with {{ sevak.name }}
+                            {% endif %}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <form action="/book/confirm/{{ sevak.id }}" method="POST">
+                        <div class="modal-body p-4 text-start">
+                            <input type="hidden" name="service_title" value="{{ service.title }}">
+                            <input type="hidden" name="price" value="{{ service.price }}">
+
+                            <label class="fw-bold small text-dark mb-2 d-block">
+                                {% if current_lang == 'hi' %}आवश्यक कार्य चुनें:{% else %}Select Required Tasks:{% endif %}
+                            </label>
+                            <div class="vstack gap-2 mb-3 bg-light p-3 rounded-3 border">
+                                {% for task in service.tasks %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="tasks" value="{{ task }}" id="task_{{ sevak.id }}_{{ loop.index }}">
+                                    <label class="form-check-label small text-dark" for="task_{{ sevak.id }}_{{ loop.index }}">
+                                        {{ task }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-dark">
+                                        {% if current_lang == 'hi' %}सेवा की तारीख{% else %}Service Date{% endif %}
+                                    </label>
+                                    <input type="date" name="booking_date" class="form-control form-control-sm" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-dark">
+                                        {% if current_lang == 'hi' %}उपयुक्त समय (स्लॉट){% else %}Preferred Slot{% endif %}
+                                    </label>
+                                    <select name="time_slot" class="form-select form-select-sm" required>
+                                        {% if current_lang == 'hi' %}
+                                            <option value="प्रातःकाल (09:00 पूर्वाह्न - 12:00 दोपहर)">प्रातः (9AM - 12PM)</option>
+                                            <option value="दोपहर (12:00 दोपहर - 03:00 अपराह्न)">दोपहर (12PM - 3PM)</option>
+                                            <option value="सायंकाल (03:00 अपराह्न - 06:00 शाम)">शाम (3PM - 6PM)</option>
+                                            <option value="रात्रि (06:00 शाम - 09:00 रात)">रात (6PM - 9PM)</option>
+                                        {% else %}
+                                            <option value="Morning (09:00 AM - 12:00 PM)">Morning (9AM - 12PM)</option>
+                                            <option value="Afternoon (12:00 PM - 03:00 PM)">Afternoon (12PM - 3PM)</option>
+                                            <option value="Evening (03:00 PM - 06:00 PM)">Evening (3PM - 6PM)</option>
+                                            <option value="Night (06:00 PM - 09:00 PM)">Night (6PM - 9PM)</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold text-dark">
+                                    {% if current_lang == 'hi' %}घर का पूरा पता{% else %}Complete Doorstep Address{% endif %}
+                                </label>
+                                <textarea name="address" class="form-control form-control-sm" rows="2" placeholder="{% if current_lang == 'hi' %}मकान नं., मंजिल, गली/मोहल्ले का नाम...{% else %}Flat / House No., Floor, Street, Area...{% endif %}" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-dark">
+                                    {% if current_lang == 'hi' %}निकटतम पहचान चिह्न (Landmark){% else %}Landmark{% endif %}
+                                </label>
+                                <input type="text" name="landmark" class="form-control form-control-sm" placeholder="{% if current_lang == 'hi' %}उदा. मंदिर के पास / बैंक के सामने{% else %}e.g. Near City Park / Opposite HDFC Bank{% endif %}" required>
+                            </div>
+
+                            <!-- Payment Option Selection in Booking Modal -->
+                            <div class="mb-3 text-start">
+                                <label class="form-label small fw-bold text-dark">
+                                    {% if current_lang == 'hi' %}भुगतान का तरीका (Payment Mode){% else %}Payment Mode{% endif %}
+                                </label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="radio" class="btn-check" name="payment_method" id="pay_upi_{{ sevak.id }}" value="UPI / Online" checked>
+                                        <label class="btn btn-outline-primary btn-sm w-100 py-2 rounded-3 text-center fw-semibold" for="pay_upi_{{ sevak.id }}">
+                                            <i class="bi bi-qr-code-scan me-1"></i> UPI / QR Code
+                                        </label>
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="radio" class="btn-check" name="payment_method" id="pay_cod_{{ sevak.id }}" value="Cash on Delivery">
+                                        <label class="btn btn-outline-secondary btn-sm w-100 py-2 rounded-3 text-center fw-semibold" for="pay_cod_{{ sevak.id }}">
+                                            <i class="bi bi-cash-stack me-1"></i> Cash After Work
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-2 bg-warning bg-opacity-10 rounded-3 text-dark small border border-warning border-opacity-25">
+                                <i class="bi bi-shield-check text-warning me-1"></i>
+                                {% if current_lang == 'hi' %}
+                                    कार्य पूर्ण होने के उपरांत निर्धारित {{ service.price }} का भुगतान सुरक्षित रूप से करें।
+                                {% else %}
+                                    Pay standard {{ service.price }} securely via Cash/UPI after task completion.
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="modal-footer border-top">
+                            <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">
+                                {% if current_lang == 'hi' %}रद्द करें{% else %}Cancel{% endif %}
+                            </button>
+                            <button type="submit" class="btn btn-custom-primary btn-sm px-4 fw-bold">
+                                {% if current_lang == 'hi' %}ऑर्डर पक्का करें{% else %}Confirm Booking{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 py-5 text-center bg-white border rounded-4">
+            <i class="bi bi-person-x text-muted fs-1 mb-2 d-block"></i>
+            <h6 class="fw-bold text-dark">
+                {% if current_lang == 'hi' %}इस सेवा के लिए वर्तमान में कोई सेवक उपलब्ध नहीं है{% else %}No specialists currently available for this service{% endif %}
+            </h6>
+            <p class="text-muted small">
+                {% if current_lang == 'hi' %}कृपया कुछ समय पश्चात पुनः प्रयास करें।{% else %}Please check back in a few minutes or choose another category.{% endif %}
+            </p>
+            <a href="/home" class="btn btn-primary btn-sm px-4">
+                {% if current_lang == 'hi' %}सेवाएं देखें{% else %}Browse Services{% endif %}
+            </a>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}
