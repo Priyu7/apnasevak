@@ -294,7 +294,6 @@ def update_order_status(order_id, status):
     return redirect(request.referrer or url_for("dashboard"))
 
 @app.route("/admin_dashboard")
-@app.route("/admin_dashboard")
 def admin_dashboard():
     try:
         all_users = User.query.all()
@@ -308,15 +307,16 @@ def admin_dashboard():
 
     return render_template("admin_dashboard.html", users=all_users, bookings=all_bookings)
 
+# Default Sevaks ko add karne ka function
 with app.app_context():
     db.create_all()
+    # Check karo agar sevak nahi hain toh turant add karo
     if not User.query.filter_by(role="sevak").first():
-        db.session.add_all([
-            User(name="Ramesh Kumar", phone="9876543210", password_hash=generate_password_hash("123456"), role="sevak", service_type="Electrician", is_available=True),
-            User(name="Suresh Sharma", phone="9876543211", password_hash=generate_password_hash("123456"), role="sevak", service_type="Plumber", is_available=True),
-            User(name="Amit Verma", phone="9876543212", password_hash=generate_password_hash("123456"), role="sevak", service_type="Carpenter", is_available=True),
-            User(name="Pooja Devi", phone="9876543213", password_hash=generate_password_hash("123456"), role="sevak", service_type="Cleaning", is_available=True)
-        ])
+        s1 = User(name="Ramesh Kumar", phone="9876543210", password_hash=generate_password_hash("123456"), role="sevak", service_type="Electrician", is_available=True)
+        s2 = User(name="Suresh Sharma", phone="9876543211", password_hash=generate_password_hash("123456"), role="sevak", service_type="Plumber", is_available=True)
+        s3 = User(name="Amit Verma", phone="9876543212", password_hash=generate_password_hash("123456"), role="sevak", service_type="Carpenter", is_available=True)
+        s4 = User(name="Pooja Devi", phone="9876543213", password_hash=generate_password_hash("123456"), role="sevak", service_type="Cleaning", is_available=True)
+        db.session.add_all([s1, s2, s3, s4])
         db.session.commit()
 
 if __name__ == "__main__":
