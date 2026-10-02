@@ -1,259 +1,338 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="container py-5">
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ t.orders }} | {{ t.brand_name }}</title>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <style>
+        :root {
+            --primary: #0F766E;
+            --primary-hover: #115E59;
+            --whatsapp: #25D366;
+            --whatsapp-hover: #1EBE5D;
+            --bg-color: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-dark: #1E293B;
+            --text-muted: #64748B;
+            --border: #E2E8F0;
+        }
 
-    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-        <div>
-            <h2 class="fw-bold text-dark mb-0">
-                {% if role == 'provider' %}
-                    {% if current_lang == 'hi' %}सेवक ड्यूटी कंसोल: {{ name }}{% else %}Partner Duty Console: {{ name }}{% endif %}
-                {% else %}
-                    {% if current_lang == 'hi' %}मेरे सेवा ऑर्डर्स: {{ name }}{% else %}My Bookings: {{ name }}{% endif %}
-                {% endif %}
-            </h2>
-            <p class="text-muted small mb-0">
-                {% if role == 'provider' %}
-                    {% if current_lang == 'hi' %}नए ग्राहकों के अनुरोध स्वीकार करें एवं कार्य पूर्ण करें।{% else %}Accept nearby job requests, navigate locations and manage payouts.{% endif %}
-                {% else %}
-                    {% if current_lang == 'hi' %}अपने सभी सक्रिय एवं पूर्ण हो चुके ऑर्डर्स की स्थिति देखें।{% else %}Track active visits, call your specialist and complete payments.{% endif %}
-                {% endif %}
-            </p>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            padding-bottom: 40px;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #FFFFFF;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .brand-logo {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-btn-home {
+            color: var(--primary);
+            background: #F0FDFA;
+            border: 1px solid #CCFBF1;
+        }
+
+        .nav-btn-logout {
+            color: #DC2626;
+            background: #FEF2F2;
+            border: 1px solid #FEE2E2;
+        }
+
+        /* Container */
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 16px;
+        }
+
+        /* Flash Message */
+        .flash-box {
+            background-color: #ECFDF5;
+            color: #065F46;
+            border: 1px solid #A7F3D0;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* Order Cards */
+        .order-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+        }
+
+        .order-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px dashed var(--border);
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+        }
+
+        .order-id {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .service-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 2px;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-Pending {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+
+        .badge-Accepted {
+            background-color: #E0E7FF;
+            color: #3730A3;
+        }
+
+        .badge-Completed {
+            background-color: #DCFCE7;
+            color: #166534;
+        }
+
+        .badge-Cancelled {
+            background-color: #FEE2E2;
+            color: #991B1B;
+        }
+
+        /* Details Grid */
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .detail-value {
+            font-weight: 600;
+        }
+
+        /* WhatsApp Button */
+        .btn-whatsapp {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: var(--whatsapp);
+            color: #FFFFFF;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 10px 18px;
+            border-radius: 10px;
+            width: 100%;
+            transition: background 0.2s ease;
+        }
+
+        .btn-whatsapp:hover {
+            background-color: var(--whatsapp-hover);
+        }
+
+        /* Empty State */
+        .empty-box {
+            text-align: center;
+            background: #FFFFFF;
+            padding: 48px 24px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+        }
+
+        .empty-box p {
+            color: var(--text-muted);
+            margin-bottom: 18px;
+        }
+
+        .btn-book-now {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navbar -->
+    <nav class="navbar">
+        <a href="{{ url_for('index') }}" class="brand-logo">{{ t.brand_name }}</a>
+        <div class="nav-actions">
+            <a href="{{ url_for('index') }}" class="nav-btn nav-btn-home">Home</a>
+            <a href="{{ url_for('logout') }}" class="nav-btn nav-btn-logout">{{ t.logout }}</a>
         </div>
-        {% if role == 'customer' %}
-            <a href="/home" class="btn btn-custom-primary btn-sm px-3 fw-bold rounded-pill shadow-sm">
-                + {% if current_lang == 'hi' %}नयी सेवा बुक करें{% else %}Book New Service{% endif %}
-            </a>
-        {% endif %}
-    </div>
+    </nav>
 
-    <!-- Booking List Cards -->
-    <div class="vstack gap-3">
-        {% for b in bookings %}
-        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white" style="border: 1px solid #e2e8f0 !important;">
-            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
-                <div>
-                    <h5 class="fw-bold text-dark mb-1">{{ b.service_title }}</h5>
-                    <p class="text-muted small mb-0">
-                        <i class="bi bi-calendar3 me-1"></i> {{ b.booking_date }} &bull; <i class="bi bi-clock me-1"></i> {{ b.time_slot }}
-                    </p>
-                    <p class="text-secondary small mb-0 mt-1">
-                        <strong>{% if current_lang == 'hi' %}कार्य शामिल:{% else %}Tasks:{% endif %}</strong> {{ b.selected_tasks }}
-                    </p>
-                </div>
-                <div class="text-end">
-                    <span class="fs-5 fw-bold text-primary d-block">{{ b.price }}</span>
-                    
-                    <!-- Dynamic Booking Status -->
-                    <span class="badge {% if b.status == 'Completed' %}bg-success{% elif b.status == 'Accepted' %}bg-primary{% elif b.status == 'Rejected' %}bg-danger{% else %}bg-warning text-dark{% endif %} px-2 py-1 small">
-                        {{ b.status }}
-                    </span>
+    <!-- Main Content -->
+    <div class="container">
 
-                    <!-- Dynamic Payment Badge -->
-                    {% if b.payment_status == 'Paid' %}
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1 small ms-1">
-                            <i class="bi bi-check-circle-fill me-1"></i> {% if current_lang == 'hi' %}भुगतान सफल{% else %}Paid{% endif %}
-                        </span>
-                    {% else %}
-                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger px-2 py-1 small ms-1">
-                            <i class="bi bi-clock-history me-1"></i> {% if current_lang == 'hi' %}भुगतान बाकी{% else %}Payment Pending{% endif %}
-                        </span>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Address and Landmark Box -->
-            <div class="bg-light p-3 rounded-3 my-3 border">
-                <div class="row g-2 small">
-                    <div class="col-md-7">
-                        <strong class="text-dark"><i class="bi bi-geo-alt-fill text-danger me-1"></i> {% if current_lang == 'hi' %}सेवा स्थल का पता:{% else %}Address:{% endif %}</strong>
-                        <div class="text-secondary mt-1">{{ b.address }}</div>
-                        {% if b.landmark %}
-                            <div class="text-muted mt-1"><i class="bi bi-pin-map text-primary me-1"></i> Landmark: {{ b.landmark }}</div>
-                        {% endif %}
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, msg in messages %}
+                    <div class="flash-box">
+                        <span>{{ msg }}</span>
                     </div>
-                    <div class="col-md-5 text-md-end pt-2 pt-md-0">
-                        <!-- Direct Google Maps Navigation -->
-                        <a href="https://www.google.com/maps/search/?api=1&query={{ b.address | urlencode }}" target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                            <i class="bi bi-map-fill text-success me-1"></i> {% if current_lang == 'hi' %}गूगल मैप्स पर रास्ता देखें{% else %}Open Google Maps{% endif %}
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Person In Contact & Direct Call / Actions -->
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-2 border-top">
-                <div class="small">
-                    {% if role == 'provider' %}
-                        <span class="text-muted">{% if current_lang == 'hi' %}ग्राहक:{% else %}Customer:{% endif %}</span>
-                        <strong class="text-dark ms-1">{{ b.customer.name }}</strong>
-                    {% else %}
-                        <span class="text-muted">{% if current_lang == 'hi' %}आवंटित विशेषज्ञ:{% else %}Specialist:{% endif %}</span>
-                        <strong class="text-dark ms-1">{{ b.provider.name }}</strong>
-                    {% endif %}
-                </div>
-
-                <div class="d-flex gap-2 align-items-center flex-wrap">
-                    
-                    <!-- REAL CALL BUTTONS -->
-                    {% if role == 'provider' %}
-                        <a href="tel:+91{{ b.customer.phone }}" class="btn btn-outline-primary btn-sm px-3 fw-semibold rounded-pill d-inline-flex align-items-center gap-1 shadow-sm">
-                            <i class="bi bi-telephone-fill"></i>
-                            <span>{{ t.call }} ({{ b.customer.phone }})</span>
-                        </a>
-                    {% else %}
-                        <a href="tel:+91{{ b.provider.phone }}" class="btn btn-outline-primary btn-sm px-3 fw-semibold rounded-pill d-inline-flex align-items-center gap-1 shadow-sm">
-                            <i class="bi bi-telephone-fill"></i>
-                            <span>{{ t.call }} ({{ b.provider.phone }})</span>
-                        </a>
-                    {% endif %}
-
-                    <!-- PROVIDER WORK ACTIONS -->
-                    {% if role == 'provider' %}
-                        {% if b.status == 'Pending' %}
-                            <a href="/booking/accept/{{ b.id }}" class="btn btn-primary btn-sm px-3 fw-bold rounded-pill">{{ t.accept }}</a>
-                            <a href="/booking/reject/{{ b.id }}" class="btn btn-outline-danger btn-sm px-3 rounded-pill">{{ t.reject }}</a>
-                        {% elif b.status == 'Accepted' %}
-                            <a href="/booking/complete/{{ b.id }}" class="btn btn-success btn-sm px-3 fw-bold rounded-pill">{{ t.complete }}</a>
-                        {% endif %}
-
-                        <!-- Provider Cash Received Confirmation -->
-                        {% if b.payment_status != 'Paid' and b.status == 'Completed' %}
-                            <form action="/booking/pay/{{ b.id }}" method="POST" class="d-inline">
-                                <input type="hidden" name="payment_method" value="Cash Received">
-                                <button type="submit" class="btn btn-outline-success btn-sm px-3 fw-bold rounded-pill">
-                                    <i class="bi bi-cash-coin me-1"></i> {% if current_lang == 'hi' %}नकद प्राप्त हुआ{% else %}Mark Cash Received{% endif %}
-                                </button>
-                            </form>
-                        {% endif %}
-                    {% endif %}
-
-                    <!-- CUSTOMER PAYMENT & REVIEW ACTIONS -->
-                    {% if role == 'customer' %}
-                        {% if b.payment_status != 'Paid' %}
-                            <button type="button" class="btn btn-success btn-sm px-3 fw-bold rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#payModal{{ b.id }}">
-                                <i class="bi bi-qr-code-scan me-1"></i> {% if current_lang == 'hi' %}यूपीआई भुगतान करें{% else %}Pay {{ b.price }}{% endif %}
-                            </button>
-                        {% endif %}
-
-                        {% if b.status == 'Completed' and not b.is_reviewed %}
-                            <button type="button" class="btn btn-warning btn-sm px-3 fw-bold rounded-pill text-dark" data-bs-toggle="modal" data-bs-target="#reviewModal{{ b.id }}">
-                                <i class="bi bi-star-fill text-dark me-1"></i> {% if current_lang == 'hi' %}रेटिंग दें{% else %}Rate Service{% endif %}
-                            </button>
-                        {% elif b.is_reviewed %}
-                            <span class="badge bg-light text-muted border px-2 py-1 small">
-                                <i class="bi bi-check2 text-success me-1"></i> {% if current_lang == 'hi' %}रेटिंग दर्ज है{% else %}Feedback Submitted{% endif %}
-                            </span>
-                        {% endif %}
-                    {% endif %}
-
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= DYNAMIC UPI PAYMENT POPUP MODAL ================= -->
-        <div class="modal fade" id="payModal{{ b.id }}" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
-                    <div class="p-3 text-center text-white" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
-                        <h5 class="fw-bold mb-1">
-                            {% if current_lang == 'hi' %}सुरक्षित यूपीआई भुगतान{% else %}Instant UPI Payment{% endif %}
-                        </h5>
-                        <p class="text-white-50 small mb-0">{{ b.service_title }} &bull; <strong>{{ b.price }}</strong></p>
-                    </div>
-
-                    <div class="modal-body p-4 text-center">
-                        <p class="text-muted small mb-3">
-                            {% if current_lang == 'hi' %}
-                                किसी भी यूपीआई ऐप (GPay, PhonePe, Paytm) से नीचे दिए गए QR कोड को स्कैन करके भुगतान करें:
-                            {% else %}
-                                Scan this QR code using Google Pay, PhonePe, Paytm, or BHIM UPI to complete payment:
-                            {% endif %}
-                        </p>
-
-                        <div class="p-3 bg-light rounded-4 d-inline-block border mb-3">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=apnasevak@upi%26pn=ApnaSevak%26am={{ b.price | replace('₹', '') | replace(' ', '') }}%26cu=INR" 
-                                 alt="UPI QR Code" 
-                                 class="img-fluid rounded-3" 
-                                 style="width: 170px; height: 170px;">
-                        </div>
-
-                        <div class="d-flex justify-content-center gap-2 mb-3">
-                            <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-google text-primary"></i> GPay</span>
-                            <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-wallet2 text-purple"></i> PhonePe</span>
-                            <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-shield-check text-info"></i> Paytm</span>
-                        </div>
-
-                        <form action="/booking/pay/{{ b.id }}" method="POST">
-                            <input type="hidden" name="payment_method" value="UPI / Online">
-                            <button type="submit" class="btn btn-success w-100 py-2 rounded-3 fw-bold shadow-sm">
-                                <i class="bi bi-check2-circle me-1"></i> 
-                                {% if current_lang == 'hi' %}मैंने भुगतान कर दिया है (Confirm Payment){% else %}I Have Completed Payment{% endif %}
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= RATING MODAL ================= -->
-        <div class="modal fade" id="reviewModal{{ b.id }}" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content rounded-4 border-0 shadow">
-                    <div class="modal-header border-bottom">
-                        <h5 class="modal-title fw-bold text-dark">
-                            {% if current_lang == 'hi' %}सेवा का मूल्यांकन करें{% else %}Rate & Review{% endif %}
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <form action="/booking/review/{{ b.id }}" method="POST">
-                        <div class="modal-body p-4 text-start">
-                            <label class="form-label small fw-bold text-dark">
-                                {% if current_lang == 'hi' %}रेटिंग (1 से 5 स्टार){% else %}Rating (1 to 5 Stars){% endif %}
-                            </label>
-                            <select name="rating" class="form-select mb-3" required>
-                                <option value="5">⭐⭐⭐⭐⭐ (5.0 - उत्कृष्ट सेवा)</option>
-                                <option value="4">⭐⭐⭐⭐ (4.0 - अच्छी सेवा)</option>
-                                <option value="3">⭐⭐⭐ (3.0 - सामान्य)</option>
-                                <option value="2">⭐⭐ (2.0 - संतोषजनक नहीं)</option>
-                                <option value="1">⭐ (1.0 - खराब अनुभव)</option>
-                            </select>
-
-                            <label class="form-label small fw-bold text-dark">
-                                {% if current_lang == 'hi' %}आपकी टिप्पणी (वैकल्पिक){% else %}Your Feedback (Optional){% endif %}
-                            </label>
-                            <textarea name="comment" class="form-control" rows="3" placeholder="{% if current_lang == 'hi' %}काम की गुणवत्ता, समयबद्धता और व्यवहार कैसा रहा...{% else %}Share your feedback about work quality and punctuality...{% endif %}"></textarea>
-                        </div>
-                        <div class="modal-footer border-top">
-                            <button type="submit" class="btn btn-custom-primary btn-sm px-4 fw-bold">
-                                {% if current_lang == 'hi' %}समीक्षा दर्ज करें{% else %}Submit Review{% endif %}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        {% else %}
-        <div class="py-5 text-center bg-white border rounded-4 shadow-sm">
-            <i class="bi bi-inbox text-muted fs-1 mb-2 d-block"></i>
-            <h6 class="fw-bold text-dark">
-                {% if current_lang == 'hi' %}कोई सक्रिय ऑर्डर या अनुरोध उपलब्ध नहीं है{% else %}No active orders found{% endif %}
-            </h6>
-            <p class="text-muted small">
-                {% if role == 'customer' %}
-                    {% if current_lang == 'hi' %}घर की मरम्मत व वेलनेस सेवाओं के लिए अभी ऑर्डर बुक करें।{% else %}Explore curated services and book certified experts to your doorstep.{% endif %}
-                {% else %}
-                    {% if current_lang == 'hi' %}नया कार्य आते ही आपको यहां सूचित किया जाएगा।{% else %}You will receive alerts here as soon as customers request your service.{% endif %}
-                {% endif %}
-            </p>
-            {% if role == 'customer' %}
-                <a href="/home" class="btn btn-primary btn-sm px-4">
-                    {% if current_lang == 'hi' %}सेवाएं देखें{% else %}Explore Services{% endif %}
-                </a>
+                {% endfor %}
             {% endif %}
+        {% endwith %}
+
+        <div class="header-section">
+            <h1 class="header-title">{{ t.orders }}</h1>
+            <a href="{{ url_for('index') }}" class="btn-book-now">+ Nayi Booking</a>
         </div>
-        {% endfor %}
+
+        {% if orders %}
+            {% for order in orders %}
+                <div class="order-card">
+                    <div class="order-top">
+                        <div>
+                            <span class="order-id">Order #{{ order.id }}</span>
+                            <h2 class="service-title">{{ order.service_name }}</h2>
+                        </div>
+                        <span class="badge badge-{{ order.status }}">{{ order.status }}</span>
+                    </div>
+
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Pata (Address)</span>
+                            <span class="detail-value">{{ order.address }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Samay (Preferred Time)</span>
+                            <span class="detail-value">{{ order.preferred_time }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Grahak (Customer)</span>
+                            <span class="detail-value">{{ order.customer_name }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Phone</span>
+                            <span class="detail-value">{{ order.customer_phone }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Direct WhatsApp Notification / Chat Button -->
+                    {% if order.wa_link %}
+                    <a href="{{ order.wa_link }}" target="_blank" class="btn-whatsapp">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.53 1.771.82 2.791.82 3.182 0 5.768-2.587 5.768-5.766.001-3.182-2.585-5.766-5.768-5.766zm9.969 5.766c0 5.514-4.486 10-10 10-1.742 0-3.376-.452-4.805-1.242l-5.195 1.36 1.385-5.063c-.878-1.488-1.385-3.218-1.385-5.055 0-5.514 4.486-10 10-10s10 4.486 10 10z"/>
+                        </svg>
+                        WhatsApp par Alert dekhein / Chat karein
+                    </a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-box">
+                <p>Abhi aapne koi service book nahi ki hai.</p>
+                <a href="{{ url_for('index') }}" class="btn-book-now">Pehli Seva Book Karein</a>
+            </div>
+        {% endif %}
+
     </div>
 
-</div>
-{% endblock %}
+</body>
+</html>
