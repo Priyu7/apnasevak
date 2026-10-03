@@ -768,8 +768,9 @@ if __name__ == "__main__":
     app.run(host="0.0.0.0", port=port, debug=False if os.environ.get("PORT") else True)
 
 @app.route('/sevak/add-service', methods=['POST'])
-def add_service():
-    if 'user_id' not in session or session.get('role') != 'provider':
+@app.route('/sevak/add-service', methods=['POST'])
+def provider_add_service():
+    if 'user_id' not in session or session.get('user_role') != 'provider':
         flash('Sirf sevak hi service add kar sakte hain.', 'danger')
         return redirect(url_for('dashboard'))
     
@@ -780,7 +781,7 @@ def add_service():
     
     if title and category and price:
         new_svc = Service(
-            sevak_id=session['user_id'],
+            sevak_id=int(session['user_id']),
             title=title,
             category=category,
             price=int(price),
