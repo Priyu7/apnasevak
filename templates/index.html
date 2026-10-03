@@ -11,16 +11,16 @@
         <p class="text-muted">{{ t.catalog_subtitle }}</p>
     </div>
 
-    <!-- HERO BANNER SECTION -->
-<div class="py-5 mb-4 text-center" style="background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%); border-bottom: 1px solid #E2E8F0;">
+  <!-- HERO BANNER SECTION (Compact & Clean like Image 2) -->
+<div class="pt-4 pb-3 mb-2 text-center" style="background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%);">
     <div class="container">
-        <span class="badge rounded-pill px-3 py-2 mb-3 fw-semibold" style="background: #E0F2FE; color: #0369A1; font-size: 0.85rem;">
+        <span class="badge rounded-pill px-3 py-1 mb-2 fw-semibold" style="background: #E0F2FE; color: #0369A1; font-size: 0.8rem;">
             ⚡ {% if current_lang == 'hi' %}सत्यापित एवं भरोसेमंद लोकल सेवाएँ{% else %}Verified & Trusted Local Services{% endif %}
         </span>
-        <h1 class="fw-bold text-dark mb-2" style="font-size: 2.2rem; letter-spacing: -0.5px;">
+        <h2 class="fw-bold text-dark mb-2" style="font-size: 1.85rem; letter-spacing: -0.5px;">
             {% if current_lang == 'hi' %}घर बैठे पाएं बेहतरीन सेवाएँ{% else %}Expert Home Services on Demand{% endif %}
-        </h1>
-        <p class="text-muted mx-auto mb-4" style="max-width: 550px; font-size: 1rem;">
+        </h2>
+        <p class="text-muted mx-auto mb-3" style="max-width: 520px; font-size: 0.9rem;">
             {% if current_lang == 'hi' %}
                 इलेक्ट्रीशियन, प्लंबर, कारपेंटर और ब्यूटी एक्सपर्ट्स—एक क्लिक में बुक करें।
             {% else %}
@@ -29,18 +29,21 @@
         </p>
 
         <!-- Search Bar -->
-        <div class="mx-auto" style="max-width: 480px;">
+        <div class="mx-auto" style="max-width: 440px;">
             <div class="input-group shadow-sm rounded-pill overflow-hidden border bg-white p-1">
                 <span class="input-group-text bg-white border-0 ps-3 text-muted">
                     <i class="bi bi-search"></i>
                 </span>
-                <input type="text" id="serviceSearchInput" class="form-control border-0 shadow-none" 
+                <input type="text" id="serviceSearchInput" class="form-control border-0 shadow-none py-1" 
                        placeholder="{% if current_lang == 'hi' %}सेवा खोजें (उदा. Electrician, Spa...){% else %}Search for services (e.g. Electrician, Spa...){% endif %}" 
-                       onkeyup="filterServices()" style="font-size: 0.95rem;">
+                       onkeyup="filterServices()" style="font-size: 0.9rem;">
             </div>
         </div>
     </div>
 </div>
+
+<!-- CARDS CONTAINER (py-5 ki jagah py-3 karein) -->
+<div class="container py-3">
 
     <!-- Services Grid -->
     <div class="row g-4">
