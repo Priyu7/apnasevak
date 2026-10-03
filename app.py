@@ -6,7 +6,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 # Secret key configuration for sessions
@@ -142,6 +142,14 @@ class Review(db.Model):
     customer = db.relationship("User", foreign_keys="Review.user_id")
     booking = db.relationship("Booking", foreign_keys="Review.booking_id")
 
+class Service(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sevak_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    price = db.Column(db.Integer, nullable=False)
+    category = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 # ----------------- SERVICES CATALOG -----------------
 SERVICES_CATALOG = [
     {
