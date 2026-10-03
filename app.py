@@ -614,12 +614,20 @@ def dashboard():
     if role == "provider":
         bookings = Booking.query.filter_by(provider_id=current_user_id).order_by(Booking.id.desc()).all()
         provider_reviews = Review.query.filter_by(provider_id=current_user_id).order_by(Review.id.desc()).all()
+        my_services = Service.query.filter_by(sevak_id=current_user_id).all()
     else:
         bookings = Booking.query.filter_by(user_id=current_user_id).order_by(Booking.id.desc()).all()
         provider_reviews = []
+        my_services = []
 
-    return render_template("dashboard.html", bookings=bookings, role=role, name=session.get("user_name"), reviews=provider_reviews)
-
+    return render_template(
+        "dashboard.html",
+        bookings=bookings,
+        role=role,
+        name=session.get("user_name"),
+        reviews=provider_reviews,
+        my_services=my_services
+    )
 @app.route("/admin")
 def admin_dashboard():
     if "user_id" not in session or session.get("user_role") != "admin":
@@ -712,6 +720,45 @@ def open_browser():
     except Exception:
         pass
 
+@app.route('/sevak/add-service', methods=['POST'])
+def add_service():
+    if 'user_id' not in session or session.get('role') != 'sevak':
+        flash('Please login as Sevak to add services.', 'danger')
+        return redirect(url_for('login'))
+    
+    title = request.form.get('title')
+    category = request.form.get('category')
+    price = request.form.get('price')
+    description = request.form.get('description')
+    
+    if title and category and price:
+        new_service = Service(
+            sevak_id=session['user_id'],
+            title=title,
+            category=category,
+            price=int(price),
+            description=description
+        )
+        db.session.add(new_service)
+        db.session.commit()
+        flash('Service successfully added!', 'success')
+    else:
+        flash('Please fill all required fields.', 'warning')
+        
+    return redirect(url_for('dashboard'))
+
+@app.route('/sevak/delete-service/<int:service_id>', methods=['POST'])
+def delete_service(service_id):
+    if 'user_id' not in session or session.get('role') != 'sevak':
+        return redirect(url_for('login'))
+        
+    service = Service.query.filter_by(id=service_id, sevak_id=session['user_id']).first()
+    if service:
+        db.session.delete(service)
+        db.session.commit()
+        flash('Service deleted.', 'info')
+    return redirect(url_for('dashboard'))
+
 # ----------------- APP INITIALIZATION (LOCAL + RENDER READY) -----------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
@@ -719,3 +766,40 @@ if __name__ == "__main__":
     if port == 5000 and not os.environ.get("WERKZEUG_RUN_MAIN"):
         Timer(1.5, open_browser).start()
     app.run(host="0.0.0.0", port=port, debug=False if os.environ.get("PORT") else True)
+
+@app.route('/sevak/add-service', methods=['POST'])
+def add_service():
+    if 'user_id' not in session or session.get('role') != 'provider':
+        flash('Sirf sevak hi service add kar sakte hain.', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    title = request.form.get('title')
+    category = request.form.get('category')
+    price = request.form.get('price')
+    description = request.form.get('description')
+    
+    if title and category and price:
+        new_svc = Service(
+            sevak_id=session['user_id'],
+            title=title,
+            category=category,
+            price=int(price),
+            description=description
+        )
+        db.session.add(new_svc)
+        db.session.commit()
+        flash('Service successfully add ho gayi!', 'success')
+        
+    return redirect(url_for('dashboard'))
+
+@app.route('/sevak/delete-service/<int:service_id>', methods=['POST'])
+def delete_service(service_id):
+    if 'user_id' not in session or session.get('role') != 'provider':
+        return redirect(url_for('dashboard'))
+        
+    svc = Service.query.filter_by(id=service_id, sevak_id=session['user_id']).first()
+    if svc:
+        db.session.delete(svc)
+        db.session.commit()
+        flash('Service hata di gayi.', 'info')
+    return redirect(url_for('dashboard'))

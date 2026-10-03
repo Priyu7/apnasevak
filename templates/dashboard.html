@@ -68,6 +68,56 @@
 {% endif %}
 
     <!-- Booking List Cards -->
+<!-- PROVIDER CUSTOM SERVICES SECTION -->
+{% if role == 'provider' %}
+<div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4" style="border: 1px solid #e2e8f0 !important;">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold m-0">➕ Nayi Service List Karein (Add Service)</h5>
+  </div>
+  <form action="/sevak/add-service" method="POST">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label small fw-bold text-muted">Service Name</label>
+        <input type="text" name="title" class="form-control rounded-3" placeholder="Jaise: AC Cleaning, Fan Repair" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-bold text-muted">Category</label>
+        <input type="text" name="category" class="form-control rounded-3" placeholder="Jaise: Electrician, Plumbing" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small fw-bold text-muted">Price (₹)</label>
+        <input type="number" name="price" class="form-control rounded-3" placeholder="299" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-bold text-muted">Details</label>
+        <input type="text" name="description" class="form-control rounded-3" placeholder="Short description">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary rounded-pill px-4 mt-3 fw-bold">Add Service</button>
+  </form>
+
+  <hr class="my-4">
+  <h6 class="fw-bold mb-3">Aapki Listed Services:</h6>
+  <div class="vstack gap-2">
+    {% for s in my_services %}
+      <div class="p-3 rounded-3 bg-light d-flex justify-content-between align-items-center">
+        <div>
+          <span class="fw-bold text-dark">{{ s.title }}</span> 
+          <span class="badge bg-secondary ms-2">{{ s.category }}</span>
+          <span class="text-primary fw-bold ms-2">₹{{ s.price }}</span>
+          {% if s.description %}<div class="text-muted small mt-1">{{ s.description }}</div>{% endif %}
+        </div>
+        <form action="/sevak/delete-service/{{ s.id }}" method="POST" style="margin: 0;">
+          <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">Hatao</button>
+        </form>
+      </div>
+    {% else %}
+      <p class="text-muted small m-0">Abhi tak aapne koi extra custom service list nahi ki hai.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
     <div class="vstack gap-3">
         {% for b in bookings %}
         <div class="card border-0 shadow-sm rounded-4 p-4 bg-white" style="border: 1px solid #e2e8f0 !important;">
