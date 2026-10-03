@@ -405,6 +405,33 @@ def complete_payment(booking_id):
     
     return redirect(url_for("dashboard"))
 
+@app.route("/booking/quote_price/<int:booking_id>", methods=["POST"])
+def quote_price(booking_id):
+    if "user_id" not in session:
+        return redirect(url_for("gateway"))
+        
+    booking = Booking.query.get_or_404(booking_id)
+    new_price = request.form.get("price", "").strip()
+    
+    if new_price:
+        booking.price = f"₹{new_price.replace('₹', '')}"
+        booking.status = "Price Quoted"
+        db.session.commit()
+        flash("Kaam ke anusaar naya rate customer ko bhej diya gaya hai.", "success")
+        
+    return redirect(url_for("dashboard"))
+
+@app.route("/booking/accept_quote/<int:booking_id>", methods=["POST"])
+def accept_quote(booking_id):
+    if "user_id" not in session:
+        return redirect(url_for("gateway"))
+        
+    booking = Booking.query.get_or_404(booking_id)
+    booking.status = "Accepted"
+    db.session.commit()
+    flash("Aapne naye rate ko accept kar liya hai! Sevak ko confirm ho gaya.", "success")
+    return redirect(url_for("dashboard"))
+
 @app.route("/booking/review/<int:booking_id>", methods=["POST"])
 def submit_review(booking_id):
     if "user_id" not in session or session.get("user_role") != "customer":
