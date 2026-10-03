@@ -794,11 +794,11 @@ def provider_add_service():
     return redirect(url_for('dashboard'))
 
 @app.route('/sevak/delete-service/<int:service_id>', methods=['POST'])
-def delete_service(service_id):
-    if 'user_id' not in session or session.get('role') != 'provider':
+def provider_delete_service(service_id):
+    if 'user_id' not in session or session.get('user_role') != 'provider':
         return redirect(url_for('dashboard'))
         
-    svc = Service.query.filter_by(id=service_id, sevak_id=session['user_id']).first()
+    svc = Service.query.filter_by(id=service_id, sevak_id=int(session['user_id'])).first()
     if svc:
         db.session.delete(svc)
         db.session.commit()
