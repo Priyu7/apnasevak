@@ -5,6 +5,7 @@ from threading import Timer
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from datetime import timedelta
 
 app = Flask(__name__)
@@ -13,6 +14,9 @@ app.secret_key = os.environ.get("SECRET_KEY", "apnasevak_hyperlocal_secure_key_2
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///apnasevak.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
+UPLOAD_FOLDER = os.path.join("static", "uploads", "qrcodes")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
 
@@ -95,6 +99,7 @@ class User(db.Model):
     rating_count = db.Column(db.Integer, default=1)
     experience = db.Column(db.String(20), default="3+ Yrs")
     password = db.Column(db.String(200), nullable=False)
+    qr_code = db.Column(db.String(255), nullable=True, default="default_qr.png")
 
     bookings = db.relationship("Booking", backref="customer", foreign_keys="Booking.user_id", lazy=True)
     reviews_received = db.relationship("Review", backref="provider", foreign_keys="Review.provider_id", lazy=True)
@@ -671,7 +676,23 @@ def admin_delete_booking(booking_id):
 def logout():
     session.clear()
     return redirect(url_for("gateway"))
-
+@app.route("/sevak/upload_qr", methods=["POST"])
+def upload_qr():
+    if "user_id" not in session or session.get("user_role") != "provider":
+        return redirect(url_for("gateway"))
+        
+    user = User.query.get_or_404(session["user_id"])
+    qr_file = request.files.get("qr_code_file")
+    
+    if qr_file and qr_file.filename != "":
+        clean_name = secure_filename(f"qr_provider_{user.id}_{qr_file.filename}")
+        save_path = os.path.join(app.config["UPLOAD_FOLDER"], clean_name)
+        qr_file.save(save_path)
+        user.qr_code = clean_name
+        db.session.commit()
+        flash("Aapka UPI QR Code safaltapoorvak upload ho gaya!", "success")
+        
+    return redirect(url_for("dashboard"))
 def open_browser():
     try:
         webbrowser.open("http://127.0.0.1:5000")
