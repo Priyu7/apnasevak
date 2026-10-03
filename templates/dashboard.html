@@ -29,6 +29,44 @@
         {% endif %}
     </div>
 
+<!-- SEVAK QR CODE UPLOAD CARD -->
+{% if role == 'provider' %}
+<div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white" style="border: 1px solid #e2e8f0 !important;">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <h5 class="fw-bold mb-1 text-dark">
+                <i class="bi bi-qr-code text-primary me-2"></i>
+                {% if current_lang == 'hi' %}आपका UPI QR कोड{% else %}Your UPI QR Code{% endif %}
+            </h5>
+            <p class="text-muted small mb-0">
+                {% if current_lang == 'hi' %}
+                    अपना QR कोड अपलोड करें ताकि कस्टमर सीधे आपके बैंक खाते में भुगतान कर सकें।
+                {% else %}
+                    Upload your QR code so customers can pay directly to your account.
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <!-- Current QR Preview if uploaded -->
+            {% if current_user and current_user.qr_code and current_user.qr_code != 'default_qr.png' %}
+                <img src="{{ url_for('static', filename='uploads/qrcodes/' + current_user.qr_code) }}" 
+                     alt="Uploaded QR" class="rounded border p-1" style="width: 55px; height: 55px; object-fit: cover;">
+            {% endif %}
+
+            <!-- Upload Form -->
+            <form action="/sevak/upload_qr" method="POST" enctype="multipart/form-data" class="d-flex gap-2 align-items-center">
+                <input type="file" name="qr_code_file" accept="image/*" required class="form-control form-control-sm" style="max-width: 220px;">
+                <button type="submit" class="btn btn-primary btn-sm px-3 rounded-pill fw-bold text-nowrap">
+                    <i class="bi bi-cloud-arrow-up-fill me-1"></i>
+                    {% if current_lang == 'hi' %}अपलोड करें{% else %}Upload QR{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
     <!-- Booking List Cards -->
     <div class="vstack gap-3">
         {% for b in bookings %}
