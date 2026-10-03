@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ current_lang }}">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,11 +16,13 @@
             --dark-text: #0f172a;
             --border-subtle: #e2e8f0;
         }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
         }
+
         .btn-custom-primary {
             background-color: var(--primary-brand);
             color: #ffffff;
@@ -28,10 +31,12 @@
             padding: 8px 18px;
             transition: all 0.2s ease;
         }
+
         .btn-custom-primary:hover {
             background-color: var(--primary-hover);
             color: #ffffff;
         }
+
         .navbar-brand-custom {
             font-weight: 800;
             font-size: 1.35rem;
@@ -41,14 +46,16 @@
     </style>
     {% block extra_head %}{% endblock %}
 </head>
+
 <body class="d-flex flex-column min-vh-100 {% block body_class %}{% endblock %}">
 
     <!-- Global Navigation -->
     <nav class="navbar navbar-expand-lg bg-white border-bottom py-3 sticky-top shadow-xs">
         <div class="container">
-            <a class="navbar-brand navbar-brand-custom d-flex align-items-center gap-2" 
-               href="{% if session.get('user_role') == 'admin' %}/admin{% elif session.get('user_role') == 'provider' %}/dashboard{% else %}/home{% endif %}">
-                <div class="bg-primary text-white rounded-3 p-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+            <a class="navbar-brand navbar-brand-custom d-flex align-items-center gap-2"
+                href="{% if session.get('user_role') == 'admin' %}/admin{% elif session.get('user_role') == 'provider' %}/dashboard{% else %}/home{% endif %}">
+                <div class="bg-primary text-white rounded-3 p-1 d-flex align-items-center justify-content-center"
+                    style="width: 32px; height: 32px;">
                     <i class="bi bi-tools"></i>
                 </div>
                 <span>Apna<span class="text-primary">Sevak</span></span>
@@ -56,29 +63,30 @@
 
             <!-- Right Controls -->
             <div class="d-flex align-items-center gap-2 ms-auto flex-wrap">
-                <a href="/set-lang/{{ t.lang_code }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold">
+                <a href="/set-lang/{{ t.lang_code }}"
+                    class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold">
                     🌐 {{ t.switch_lang }}
                 </a>
 
                 {% if session.get('user_id') %}
-                    {% if session.get('user_role') == 'admin' %}
-                        <a href="/admin" class="btn btn-warning btn-sm px-3 rounded-2 fw-bold text-dark">
-                            {{ t.owner_console }}
-                        </a>
-                    {% elif session.get('user_role') == 'provider' %}
-                        <a href="/dashboard" class="btn btn-outline-secondary btn-sm px-3 rounded-2 fw-semibold">
-                            {{ t.requests }}
-                        </a>
-                    {% else %}
-                        <a href="/home" class="nav-link text-secondary fw-semibold px-2">{{ t.services }}</a>
-                        <a href="/dashboard" class="btn btn-outline-secondary btn-sm px-3 rounded-2 fw-semibold">
-                            {{ t.orders }}
-                        </a>
-                    {% endif %}
-                    <a href="/logout" class="btn btn-danger btn-sm px-3 rounded-2 fw-semibold">{{ t.logout }}</a>
+                {% if session.get('user_role') == 'admin' %}
+                <a href="/admin" class="btn btn-warning btn-sm px-3 rounded-2 fw-bold text-dark">
+                    {{ t.owner_console }}
+                </a>
+                {% elif session.get('user_role') == 'provider' %}
+                <a href="/dashboard" class="btn btn-outline-secondary btn-sm px-3 rounded-2 fw-semibold">
+                    {{ t.requests }}
+                </a>
                 {% else %}
-                    <a href="/login" class="nav-link text-secondary fw-semibold">{{ t.login }}</a>
-                    <a href="/signup" class="btn btn-custom-primary btn-sm px-3 fw-semibold">{{ t.signup }}</a>
+                <a href="/home" class="nav-link text-secondary fw-semibold px-2">{{ t.services }}</a>
+                <a href="/dashboard" class="btn btn-outline-secondary btn-sm px-3 rounded-2 fw-semibold">
+                    {{ t.orders }}
+                </a>
+                {% endif %}
+                <a href="/logout" class="btn btn-danger btn-sm px-3 rounded-2 fw-semibold">{{ t.logout }}</a>
+                {% else %}
+                <a href="/login" class="nav-link text-secondary fw-semibold">{{ t.login }}</a>
+                <a href="/signup" class="btn btn-custom-primary btn-sm px-3 fw-semibold">{{ t.signup }}</a>
                 {% endif %}
             </div>
         </div>
@@ -98,11 +106,14 @@
 
     <!-- Bootstrap Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <footer style="text-align: center; padding: 20px 0; margin-top: 40px; border-top: 1px solid #E2E8F0; color: #64748B; font-size: 0.85rem;">
-    <p style="margin: 0;">&copy; 2026 <strong>ApnaSevak</strong>. All rights reserved.</p>
-    <p style="margin: 4px 0 0 0; font-weight: 600; color: #0284C7;">
-        Founder & Owner: <span style="color: #0F172A;">APSRA</span>
-    </p>
-</footer>
+    <footer
+        style="text-align: center; padding: 18px 0; margin-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.15); color: #cbd5e1; font-size: 0.88rem;">
+        <p style="margin: 0; opacity: 0.85;">&copy; 2026 <strong>ApnaSevak</strong>. All rights reserved.</p>
+        <p style="margin: 6px 0 0 0; font-weight: 600; color: #38bdf8;">
+            Founder & Owner: <span
+                style="color: #ffffff; font-weight: bold; background: rgba(56, 189, 248, 0.15); padding: 2px 10px; border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.3);">APSRA</span>
+        </p>
+    </footer>
 </body>
+
 </html>
