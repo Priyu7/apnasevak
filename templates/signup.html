@@ -11,25 +11,28 @@
         position: relative;
         overflow: hidden;
     }
+
     .ambient-glow-signup {
         position: absolute;
         width: 500px;
         height: 500px;
-        background: radial-gradient(circle, rgba(37, 99, 235, 0.28) 0%, rgba(0,0,0,0) 70%);
+        background: radial-gradient(circle, rgba(37, 99, 235, 0.28) 0%, rgba(0, 0, 0, 0) 70%);
         top: -90px;
         left: 50%;
         transform: translateX(-50%);
         pointer-events: none;
     }
+
     .ambient-glow-subtle {
         position: absolute;
         width: 400px;
         height: 400px;
-        background: radial-gradient(circle, rgba(245, 158, 11, 0.16) 0%, rgba(0,0,0,0) 70%);
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.16) 0%, rgba(0, 0, 0, 0) 70%);
         bottom: -60px;
         right: 18%;
         pointer-events: none;
     }
+
     .pro-signup-card {
         width: 100%;
         max-width: 480px;
@@ -41,12 +44,14 @@
         position: relative;
         z-index: 2;
     }
+
     .pro-signup-header {
         background: linear-gradient(135deg, #090d16 0%, #1a2234 100%);
         padding: 30px 24px 22px;
         text-align: center;
         color: #ffffff;
     }
+
     .role-badge-pill {
         display: inline-flex;
         align-items: center;
@@ -62,6 +67,7 @@
         color: #93c5fd;
         border: 1px solid rgba(37, 99, 235, 0.4);
     }
+
     .signup-btn-action {
         background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
         color: #ffffff !important;
@@ -78,6 +84,7 @@
         box-shadow: 0 8px 20px -3px rgba(37, 99, 235, 0.45);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
+
     .signup-btn-action:hover {
         transform: translateY(-2px);
         box-shadow: 0 12px 24px -4px rgba(37, 99, 235, 0.55);
@@ -89,7 +96,7 @@
     <div class="ambient-glow-subtle"></div>
 
     <div class="pro-signup-card">
-        
+
         <div class="pro-signup-header">
             <div class="role-badge-pill">
                 <i class="bi bi-person-plus-fill"></i>
@@ -106,26 +113,32 @@
 
         <div class="p-4 pt-3">
             <form action="/signup" method="POST">
-                
+
                 <div class="mb-3 text-start">
                     <label class="form-label small fw-bold text-dark mb-1">Full Name</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0" style="border-radius: 14px 0 0 14px;">
                             <i class="bi bi-person text-muted"></i>
                         </span>
-                        <input type="text" name="name" class="form-control bg-light border-start-0 py-2" placeholder="e.g. Priyanshu Sharma" style="border-radius: 0 14px 14px 0;" required autofocus>
+                        <input type="text" name="name" class="form-control bg-light border-start-0 py-2"
+                            placeholder="e.g. Priyanshu Sharma" style="border-radius: 0 14px 14px 0;" required
+                            autofocus>
                     </div>
                 </div>
 
                 <div class="mb-3 text-start">
                     <label class="form-label small fw-bold text-dark mb-1">Mobile Number</label>
                     <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0 fw-semibold text-secondary" style="border-radius: 14px 0 0 14px; font-size: 0.85rem;">
+                        <span class="input-group-text bg-light border-end-0 fw-semibold text-secondary"
+                            style="border-radius: 14px 0 0 14px; font-size: 0.85rem;">
                             +91
                         </span>
-                        <input type="tel" name="phone" pattern="[0-9]{10}" class="form-control bg-light border-start-0 py-2" placeholder="10-digit mobile number" style="border-radius: 0 14px 14px 0;" required>
+                        <input type="tel" name="phone" pattern="[0-9]{10}"
+                            class="form-control bg-light border-start-0 py-2" placeholder="10-digit mobile number"
+                            style="border-radius: 0 14px 14px 0;" required>
                     </div>
-                    <small class="text-muted" style="font-size: 0.72rem;">Used for direct calls and service updates.</small>
+                    <small class="text-muted" style="font-size: 0.72rem;">Used for direct calls and service
+                        updates.</small>
                 </div>
 
                 <div class="mb-3 text-start">
@@ -134,22 +147,23 @@
                         <span class="input-group-text bg-light border-end-0" style="border-radius: 14px 0 0 14px;">
                             <i class="bi bi-envelope text-muted"></i>
                         </span>
-                        <input type="email" name="email" class="form-control bg-light border-start-0 py-2" placeholder="name@example.com" style="border-radius: 0 14px 14px 0;" required>
+                        <input type="email" name="email" class="form-control bg-light border-start-0 py-2"
+                            placeholder="name@example.com" style="border-radius: 0 14px 14px 0;" required>
                     </div>
                 </div>
 
-                <div class="mb-3 text-start">
-                    <label class="form-label small fw-bold text-dark mb-1">I want to join as</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0" style="border-radius: 14px 0 0 14px;">
-                            <i class="bi bi-briefcase text-muted"></i>
-                        </span>
-                        <select name="role" id="roleSelector" class="form-select bg-light border-start-0 py-2" style="border-radius: 0 14px 14px 0;" onchange="var el = document.getElementById('skillContainer'); if(el) { el.style.display = (this.value === 'provider') ? 'block' : 'none'; }">
-                            <option value="customer">Customer (Book Home Services)</option>
-                            <option value="provider">Sevak Partner (Provide Services & Earn)</option>
-                        </select>
-                    </div>
+                <!-- NAYA CODE: Agar URL me role pehle se hai toh dropdown mat dikhao, seedha hidden input pass karo -->
+                {% if request.args.get('role') %}
+                <input type="hidden" name="role" value="{{ request.args.get('role') }}">
+                {% else %}
+                <div class="mb-3">
+                    <label class="form-label">I want to join as</label>
+                    <select name="role" class="form-select">
+                        <option value="customer">Customer (Book Home Services)</option>
+                        <option value="provider">Sevak (Offer Services)</option>
+                    </select>
                 </div>
+                {% endif %}
 
                 <div class="mb-3 text-start" id="skillContainer" style="display: none;">
                     <label class="form-label small fw-bold text-dark mb-1">
@@ -157,7 +171,7 @@
                     </label>
                     <select name="skill_key" class="form-select bg-light py-2" style="border-radius: 14px;">
                         {% for s in services %}
-                            <option value="{{ s.key }}">{{ s.title }} ({{ s.price }})</option>
+                        <option value="{{ s.key }}">{{ s.title }} ({{ s.price }})</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -168,7 +182,8 @@
                         <span class="input-group-text bg-light border-end-0" style="border-radius: 14px 0 0 14px;">
                             <i class="bi bi-lock text-muted"></i>
                         </span>
-                        <input type="password" name="password" class="form-control bg-light border-start-0 py-2" placeholder="Create a strong password" style="border-radius: 0 14px 14px 0;" required>
+                        <input type="password" name="password" class="form-control bg-light border-start-0 py-2"
+                            placeholder="Create a strong password" style="border-radius: 0 14px 14px 0;" required>
                     </div>
                 </div>
 
