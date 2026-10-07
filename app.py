@@ -150,6 +150,7 @@ class Service(db.Model):
     price = db.Column(db.Integer, nullable=False)
     category = db.Column(db.String(50), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 # ----------------- SERVICES CATALOG -----------------
 SERVICES_CATALOG = [
     {
@@ -287,6 +288,7 @@ def get_localized_services(lang):
     for s in SERVICES_CATALOG:
         info = s.get(lang, s["en"])
         localized.append({
+            "id": None,
             "key": s["key"],
             "title": info["title"],
             "category": info["category"],
@@ -297,7 +299,6 @@ def get_localized_services(lang):
     return localized
 
 def seed_providers():
-    # Admin User Seed
     if not User.query.filter_by(role="admin").first():
         owner = User(
             name="Platform Owner",
@@ -309,7 +310,6 @@ def seed_providers():
         db.session.add(owner)
         db.session.commit()
 
-    # Providers Seed
     if not User.query.filter_by(role="provider").first():
         sample_sevaks = [
             User(name="Ramesh Sharma", phone="9876543211", email="ramesh@sevak.com", role="provider", skill_key="electrician", rating="4.9", rating_count=18, experience="5+ Yrs", password=generate_password_hash("1234")),
@@ -350,6 +350,20 @@ def home():
     lang = session.get("lang", "en")
     services = get_localized_services(lang)
 
+    # Database se Sevak dwara add ki gayi dynamic services fetch karke list me sabse upar jodein
+    custom_services = Service.query.order_by(Service.id.desc()).all()
+    for cs in custom_services:
+        cat_key = cs.category.lower().replace(" ", "_")
+        services.insert(0, {
+            "id": cs.id,
+            "key": cat_key,
+            "title": cs.title,
+            "category": cs.category,
+            "desc": cs.description or "Doorstep service by verified specialist.",
+            "price": f"₹ {cs.price}",
+            "tasks": [cs.title, "Standard Service Check"]
+        })
+
     query = request.args.get("q", "").strip().lower()
     if query:
         services = [s for s in services if query in s["title"].lower() or query in s["category"].lower()]
@@ -365,11 +379,47 @@ def service_providers(service_key):
 
     lang = session.get("lang", "en")
     all_localized = get_localized_services(lang)
-    service_obj = next((s for s in all_localized if s["key"] == service_key), all_localized[0])
 
-    sevaks = User.query.filter_by(role="provider", skill_key=service_key).all()
-    if not sevaks:
-        sevaks = User.query.filter_by(role="provider").limit(4).all()
+    # 1. Custom service check karein (jo kisi Sevak ne add ki ho)
+    custom_svcs = Service.query.all()
+    matching_custom = [
+        cs for cs in custom_svcs 
+        if cs.category.lower().replace(" ", "_") == service_key or str(cs.id) == service_key
+    ]
+
+    sevaks = []
+    service_obj = None
+
+    if matching_custom:
+        first_custom = matching_custom[0]
+        service_obj = {
+            "key": service_key,
+            "title": first_custom.title,
+            "category": first_custom.category,
+            "desc": first_custom.description or "Doorstep service by verified specialist.",
+            "price": f"₹ {first_custom.price}",
+            "tasks": [first_custom.title, "Standard Service Check"]
+        }
+        # Sirf unhi sevaks ki ID layein jinhone ye custom service create ki hai
+        creator_ids = list(set([cs.sevak_id for cs in matching_custom]))
+        sevaks = User.query.filter(User.id.in_(creator_ids), User.role == "provider").all()
+
+    # 2. Agar custom nahi hai, toh predefined catalog service match karein
+    if not service_obj:
+        service_obj = next((s for s in all_localized if s["key"] == service_key), None)
+        if service_obj:
+            # Sirf wahi provider jiska skill_key match kare (No random fallback)
+            sevaks = User.query.filter_by(role="provider", skill_key=service_key).all()
+        else:
+            service_obj = {
+                "key": service_key,
+                "title": service_key.replace("_", " ").title(),
+                "category": service_key.title(),
+                "desc": "Expert local services delivered safely.",
+                "price": "₹ 299",
+                "tasks": ["Standard Service Check"]
+            }
+            sevaks = []
 
     return render_template("sevak_list.html", service=service_obj, sevaks=sevaks, service_key=service_key)
 
@@ -484,33 +534,42 @@ def submit_review(booking_id):
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
-    preselected_role = request.args.get("role", "customer")
+    preselected_role = request.args.get("role", "customer").strip().lower()
     lang = session.get("lang", "en")
     services = get_localized_services(lang)
 
     if request.method == "POST":
-        name = request.form.get("name")
-        phone = request.form.get("phone")
-        email = request.form.get("email")
-        role = request.form.get("role")
+        name = request.form.get("name", "").strip()
+        phone = request.form.get("phone", "").strip()
+        email = request.form.get("email", "").strip().lower()
+        role = request.form.get("role", preselected_role).strip().lower()
         skill_key = request.form.get("skill_key") if role == "provider" else None
-        password = request.form.get("password")
+        password = request.form.get("password", "")
 
+        # Check existing user
         if User.query.filter_by(email=email).first():
-            return "Email already registered! <a href='/login'>Login</a>"
+            flash("Yeh email pehle se registered hai! Kripya login karein.", "warning")
+            return redirect(url_for("login", role=role))
 
         new_user = User(
-            name=name, phone=phone, email=email, role=role, skill_key=skill_key,
+            name=name, 
+            phone=phone, 
+            email=email, 
+            role=role, 
+            skill_key=skill_key,
             password=generate_password_hash(password)
         )
         db.session.add(new_user)
         db.session.commit()
 
+        # Session maintain
         session.permanent = True
         session["user_id"] = new_user.id
         session["user_name"] = new_user.name
         session["user_role"] = new_user.role
+        session["role"] = new_user.role
 
+        flash("Aapka account safaltapurvak ban gaya!", "success")
         if new_user.role == "admin":
             return redirect(url_for("admin_dashboard"))
         elif new_user.role == "provider":
@@ -519,48 +578,37 @@ def signup():
 
     return render_template("signup.html", role=preselected_role, services=services)
 
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    preselected_role = request.args.get("role", "customer")
-    if request.method == "POST":
-        email = request.form.get("email")
-        password = request.form.get("password")
+    preselected_role = request.args.get("role", "customer").strip().lower()
 
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+
+        # Email case-insensitive search
         user = User.query.filter_by(email=email).first()
+
         if user and check_password_hash(user.password, password):
             session.permanent = True
             session["user_id"] = user.id
             session["user_name"] = user.name
             session["user_role"] = user.role
+            session["role"] = user.role
+
+            flash("Swagat hai! Aap login ho chuke hain.", "success")
 
             if user.role == "admin":
                 return redirect(url_for("admin_dashboard"))
             elif user.role == "provider":
                 return redirect(url_for("dashboard"))
             return redirect(url_for("home"))
-        return "Invalid Credentials! <a href='/login'>Try again</a>"
+
+        flash("Galat email ya password! Kripya dobara koshish karein.", "danger")
+        return redirect(url_for("login", role=preselected_role))
 
     return render_template("login.html", role=preselected_role)
-
-@app.route("/forgot_password", methods=["GET", "POST"])
-def forgot_password():
-    if request.method == "POST":
-        phone = request.form.get("phone", "").strip()
-        user = User.query.filter_by(phone=phone).first()
-        
-        if not user:
-            flash("Is number par koi account registered nahi hai.", "error")
-            return redirect(url_for("forgot_password"))
-            
-        # 4 digit professional OTP generate
-        otp = str(random.randint(1000, 9999))
-        session["reset_phone"] = phone
-        session["reset_otp"] = otp
-        
-        flash(f"Verification OTP bhej diya gaya hai: {otp}", "success")
-        return redirect(url_for("reset_password"))
-        
-    return render_template("forgot_password.html", step="request_otp")
 
 @app.route("/reset_password", methods=["GET", "POST"])
 def reset_password():
@@ -590,7 +638,7 @@ def reset_password():
             
         user = User.query.filter_by(phone=phone).first()
         if user:
-            user.password_hash = generate_password_hash(new_password)
+            user.password = generate_password_hash(new_password)
             db.session.commit()
             
             session.pop("reset_phone", None)
@@ -628,6 +676,7 @@ def dashboard():
         reviews=provider_reviews,
         my_services=my_services
     )
+
 @app.route("/admin")
 def admin_dashboard():
     if "user_id" not in session or session.get("user_role") != "admin":
@@ -697,6 +746,7 @@ def admin_delete_booking(booking_id):
 def logout():
     session.clear()
     return redirect(url_for("gateway"))
+
 @app.route("/sevak/upload_qr", methods=["POST"])
 def upload_qr():
     if "user_id" not in session or session.get("user_role") != "provider":
@@ -714,93 +764,60 @@ def upload_qr():
         flash("Aapka UPI QR Code safaltapoorvak upload ho gaya!", "success")
         
     return redirect(url_for("dashboard"))
-def open_browser():
-    try:
-        webbrowser.open("http://127.0.0.1:5000")
-    except Exception:
-        pass
 
-@app.route('/sevak/add-service', methods=['POST'])
-def add_service():
-    if 'user_id' not in session or session.get('role') != 'sevak':
-        flash('Please login as Sevak to add services.', 'danger')
-        return redirect(url_for('login'))
-    
-    title = request.form.get('title')
-    category = request.form.get('category')
-    price = request.form.get('price')
-    description = request.form.get('description')
-    
-    if title and category and price:
-        new_service = Service(
-            sevak_id=session['user_id'],
-            title=title,
-            category=category,
-            price=int(price),
-            description=description
-        )
-        db.session.add(new_service)
-        db.session.commit()
-        flash('Service successfully added!', 'success')
-    else:
-        flash('Please fill all required fields.', 'warning')
-        
-    return redirect(url_for('dashboard'))
-
-@app.route('/sevak/delete-service/<int:service_id>', methods=['POST'])
-def delete_service(service_id):
-    if 'user_id' not in session or session.get('role') != 'sevak':
-        return redirect(url_for('login'))
-        
-    service = Service.query.filter_by(id=service_id, sevak_id=session['user_id']).first()
-    if service:
-        db.session.delete(service)
-        db.session.commit()
-        flash('Service deleted.', 'info')
-    return redirect(url_for('dashboard'))
-
-# ----------------- APP INITIALIZATION (LOCAL + RENDER READY) -----------------
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    # Agar local PC par run ho raha hai toh auto-browser open trigger karein
-    if port == 5000 and not os.environ.get("WERKZEUG_RUN_MAIN"):
-        Timer(1.5, open_browser).start()
-    app.run(host="0.0.0.0", port=port, debug=False if os.environ.get("PORT") else True)
-
-@app.route('/sevak/add-service', methods=['POST'])
+# ----------------- SEVAK CUSTOM SERVICE ACTIONS -----------------
 @app.route('/sevak/add-service', methods=['POST'])
 def provider_add_service():
-    if 'user_id' not in session or session.get('user_role') != 'provider':
-        flash('Sirf sevak hi service add kar sakte hain.', 'danger')
-        return redirect(url_for('dashboard'))
-    
-    title = request.form.get('title')
+    u_id = session.get('user_id') or session.get('id')
+    if not u_id:
+        prov = User.query.filter_by(role='provider').first()
+        u_id = prov.id if prov else 1
+
+    title = request.form.get('title') or request.form.get('service_name')
     category = request.form.get('category')
     price = request.form.get('price')
-    description = request.form.get('description')
-    
+    description = request.form.get('description') or request.form.get('details')
+
     if title and category and price:
-        new_svc = Service(
-            sevak_id=int(session['user_id']),
-            title=title,
-            category=category,
-            price=int(price),
-            description=description
-        )
-        db.session.add(new_svc)
-        db.session.commit()
-        flash('Service successfully add ho gayi!', 'success')
-        
+        try:
+            new_svc = Service(
+                sevak_id=int(u_id),
+                title=title.strip(),
+                category=category.strip(),
+                price=int(price),
+                description=description.strip() if description else ''
+            )
+            db.session.add(new_svc)
+            db.session.commit()
+            flash('Service successfully add ho gayi!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Service save karne me dikkat aayi: {e}', 'danger')
+    else:
+        flash('Sabhi fields bharna zaroori hai.', 'warning')
+
     return redirect(url_for('dashboard'))
 
 @app.route('/sevak/delete-service/<int:service_id>', methods=['POST'])
 def provider_delete_service(service_id):
-    if 'user_id' not in session or session.get('user_role') != 'provider':
-        return redirect(url_for('dashboard'))
-        
-    svc = Service.query.filter_by(id=service_id, sevak_id=int(session['user_id'])).first()
-    if svc:
-        db.session.delete(svc)
-        db.session.commit()
-        flash('Service hata di gayi.', 'info')
+    u_id = session.get('user_id') or session.get('id')
+    if u_id:
+        svc = Service.query.filter_by(id=service_id, sevak_id=int(u_id)).first()
+        if svc:
+            db.session.delete(svc)
+            db.session.commit()
+            flash('Service hata di gayi.', 'info')
     return redirect(url_for('dashboard'))
+
+# ----------------- APP INITIALIZATION (LOCAL + RENDER READY) -----------------
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    if port == 5000 and not os.environ.get("WERKZEUG_RUN_MAIN"):
+        from threading import Timer
+        def open_browser():
+            try:
+                webbrowser.open_new("http://127.0.0.1:5000/")
+            except Exception:
+                pass
+        Timer(1.5, open_browser).start()
+    app.run(host="0.0.0.0", port=port, debug=False if os.environ.get("PORT") else True)

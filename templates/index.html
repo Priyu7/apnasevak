@@ -1,114 +1,261 @@
 {% extends "base.html" %}
+
 {% block content %}
+<style>
+    .hero-badge {
+        background: rgba(13, 110, 253, 0.08);
+        border: 1px solid rgba(13, 110, 253, 0.2);
+        color: #0d6efd;
+        font-weight: 600;
+        font-size: 0.85rem;
+        letter-spacing: 0.3px;
+    }
+
+    .search-wrapper {
+        position: relative;
+        max-width: 580px;
+        margin: 0 auto;
+    }
+
+    .search-input {
+        height: 56px;
+        padding-left: 52px !important;
+        border-radius: 50px !important;
+        border: 1.5px solid #e2e8f0;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        font-size: 0.98rem;
+    }
+
+    .search-input:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 14px 30px -4px rgba(13, 110, 253, 0.15);
+    }
+
+    .search-icon-pos {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 1.25rem;
+        pointer-events: none;
+    }
+
+    /* Modern Service Cards with Image */
+    .service-card-pro {
+        border-radius: 20px !important;
+        border: 1px solid #e2e8f0 !important;
+        background: #ffffff;
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        overflow: hidden;
+    }
+
+    .service-card-pro:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 35px -8px rgba(15, 23, 42, 0.12) !important;
+        border-color: #cbd5e1 !important;
+    }
+
+    .service-img-wrapper {
+        height: 190px;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        background: #f1f5f9;
+    }
+
+    .service-img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    .service-card-pro:hover .service-img-wrapper img {
+        transform: scale(1.06);
+    }
+
+    .category-badge-overlay {
+        position: absolute;
+        bottom: 12px;
+        left: 12px;
+        background: rgba(15, 23, 42, 0.78);
+        backdrop-filter: blur(4px);
+        color: #ffffff;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .task-tag {
+        background-color: #f8fafc;
+        border: 1px solid #edf2f7;
+        color: #475569;
+        font-size: 0.78rem;
+        font-weight: 500;
+        padding: 4px 10px;
+        border-radius: 8px;
+    }
+
+    .btn-choose {
+        background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%);
+        border: none;
+        color: #ffffff !important;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 14px rgba(13, 110, 253, 0.35);
+    }
+
+    .btn-choose:hover {
+        box-shadow: 0 6px 20px rgba(13, 110, 253, 0.5);
+        transform: translateY(-1px);
+    }
+</style>
+
 <div class="container py-5">
-
-    <!-- Section Heading -->
-    <div class="mb-4">
-        <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-1 rounded-pill small mb-2">
-            {{ t.curated_services }}
+    <!-- Header Hero Section -->
+    <div class="text-center mb-5">
+        <span class="badge hero-badge rounded-pill px-3 py-2 mb-3">
+            ✨ {{ t.network_tag if t else "Verified & Trusted Hyperlocal Services" }}[cite: 11]
         </span>
-        <h2 class="fw-extrabold text-dark display-6 mb-2">{{ t.catalog_title }}</h2>
-        <p class="text-muted">{{ t.catalog_subtitle }}</p>
-    </div>
-
-  <!-- HERO BANNER SECTION (Compact & Clean like Image 2) -->
-<div class="pt-4 pb-3 mb-2 text-center" style="background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%);">
-    <div class="container">
-        <span class="badge rounded-pill px-3 py-1 mb-2 fw-semibold" style="background: #E0F2FE; color: #0369A1; font-size: 0.8rem;">
-            ⚡ {% if current_lang == 'hi' %}सत्यापित एवं भरोसेमंद लोकल सेवाएँ{% else %}Verified & Trusted Local Services{% endif %}
-        </span>
-        <h2 class="fw-bold text-dark mb-2" style="font-size: 1.85rem; letter-spacing: -0.5px;">
-            {% if current_lang == 'hi' %}घर बैठे पाएं बेहतरीन सेवाएँ{% else %}Expert Home Services on Demand{% endif %}
-        </h2>
-        <p class="text-muted mx-auto mb-3" style="max-width: 520px; font-size: 0.9rem;">
-            {% if current_lang == 'hi' %}
-                इलेक्ट्रीशियन, प्लंबर, कारपेंटर और ब्यूटी एक्सपर्ट्स—एक क्लिक में बुक करें।
-            {% else %}
-                Book electricians, plumbers, carpenters, and beauty professionals with transparent pricing.
-            {% endif %}
+        <h1 class="display-6 fw-bold text-dark mb-2">
+            {{ t.brand_tagline if t else "Expert Home Services on Demand" }}[cite: 11]
+        </h1>
+        <p class="text-muted mx-auto" style="max-width: 620px; font-size: 0.95rem;">
+            Book certified electricians, plumbers, carpenters, and beauty specialists near you with guaranteed transparent pricing.[cite: 11]
         </p>
 
-        <!-- Search Bar -->
-        <div class="mx-auto" style="max-width: 440px;">
-            <div class="input-group shadow-sm rounded-pill overflow-hidden border bg-white p-1">
-                <span class="input-group-text bg-white border-0 ps-3 text-muted">
-                    <i class="bi bi-search"></i>
-                </span>
-                <input type="text" id="serviceSearchInput" class="form-control border-0 shadow-none py-1" 
-                       placeholder="{% if current_lang == 'hi' %}सेवा खोजें (उदा. Electrician, Spa...){% else %}Search for services (e.g. Electrician, Spa...){% endif %}" 
-                       onkeyup="filterServices()" style="font-size: 0.9rem;">
-            </div>
+        <!-- Live Instant Search Bar -->
+        <div class="search-wrapper mt-4">
+            <span class="search-icon-pos">🔍</span>
+            <input type="text" id="liveSearchInput" class="form-control search-input" 
+                   placeholder="Search for services (e.g. Electrician, Car wash, Spa...)" 
+                   autocomplete="off">
         </div>
     </div>
-</div>
-
-<!-- CARDS CONTAINER (py-5 ki jagah py-3 karein) -->
-<div class="container py-3">
 
     <!-- Services Grid -->
-    <div class="row g-4">
+    <div class="row g-4" id="servicesGrid">
         {% for s in services %}
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white d-flex flex-column" style="border: 1px solid #e2e8f0 !important;">
-                
-                <!-- Category Tag & Icon -->
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                    <div class="bg-light text-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 46px; height: 46px; font-size: 1.25rem;">
-                        <i class="bi bi-tools"></i>
+        {% set cat = s.category | lower %}
+        {% set tit = s.title | lower %}
+
+        <!-- Category ke anusaar Automatic High-Quality Images -->
+        {% if 'electric' in cat or 'electric' in tit %}
+            {% set img_url = "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=700&auto=format&fit=crop&q=80" %}
+        {% elif 'plumb' in cat or 'plumb' in tit %}
+            {% set img_url = "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=700&auto=format&fit=crop&q=80" %}
+        {% elif 'carpent' in cat or 'wood' in cat or 'wood' in tit or 'almira' in cat or 'almira' in tit %}
+            {% set img_url = "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=700&auto=format&fit=crop&q=80" %}
+        {% elif 'ac' in tit or 'appliance' in cat %}
+            {% set img_url = "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=700&auto=format&fit=crop&q=80" %}
+        {% elif 'salon' in cat or 'beauty' in cat %}
+            {% set img_url = "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=700&auto=format&fit=crop&q=80" %}
+        {% elif 'spa' in cat or 'massage' in cat %}
+            {% set img_url = "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=700&auto=format&fit=crop&q=80" %}
+        {% elif 'car' in cat or 'car' in tit or 'wash' in tit %}
+            {% set img_url = "https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=700&auto=format&fit=crop&q=80" %}
+        {% elif 'clean' in cat or 'clean' in tit %}
+            {% set img_url = "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=700&auto=format&fit=crop&q=80" %}
+        {% else %}
+            {% set img_url = "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?w=700&auto=format&fit=crop&q=80" %}
+        {% endif %}
+
+        <div class="col-md-6 col-lg-4 service-col" 
+             data-title="{{ s.title | lower }}" 
+             data-category="{{ s.category | lower }}"
+             data-desc="{{ s.desc | lower }}">
+            <div class="card h-100 service-card-pro d-flex flex-column justify-content-between shadow-sm">
+                <div>
+                    <!-- Service Image Banner -->
+                    <div class="service-img-wrapper">
+                        <img src="{{ img_url }}" alt="{{ s.title }}" loading="lazy">
+                        <span class="category-badge-overlay">
+                            {{ s.category }}
+                        </span>
                     </div>
-                    <span class="badge bg-light text-dark border px-2 py-1 small">{{ s.category }}</span>
-                </div>
 
-                <!-- Title & Description -->
-                <h5 class="fw-bold text-dark mb-2">{{ s.title }}</h5>
-                <p class="text-muted small mb-3 flex-grow-1" style="line-height: 1.4;">{{ s.desc }}</p>
+                    <div class="p-4">
+                        <!-- Title & Description -->
+                        <h5 class="fw-bold text-dark mb-1">{{ s.title }}</h5>
+                        <p class="text-muted small mb-3" style="line-height: 1.5; min-height: 40px;">
+                            {{ s.desc }}
+                        </p>
 
-                <!-- Popular Subtasks Included -->
-                <div class="bg-light p-2 rounded-3 mb-3 border">
-                    <small class="text-muted text-uppercase fw-bold d-block mb-1" style="font-size: 0.65rem;">{{ t.popular_includes }}</small>
-                    <ul class="list-unstyled mb-0 small text-dark" style="font-size: 0.75rem;">
-                        {% for task in s.tasks[:2] %}
-                            <li>• {{ task }}</li>
-                        {% endfor %}
-                        {% if s.tasks|length > 2 %}
-                            <li class="text-primary fw-semibold mt-1">{{ t.more_tasks }}</li>
+                        <!-- Tasks List -->
+                        {% if s.tasks %}
+                        <div class="d-flex flex-wrap gap-2 mb-2">
+                            {% for task in s.tasks[:2] %}
+                            <span class="task-tag">• {{ task }}</span>
+                            {% endfor %}
+                        </div>
                         {% endif %}
-                    </ul>
+                    </div>
                 </div>
 
-                <!-- Price & Action Button -->
-                <div class="pt-2 border-top mt-auto">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <small class="text-muted">{{ t.standard_rate }}</small>
-                        <span class="fw-bold text-dark fs-5">{{ s.price }}</span>
+                <!-- Footer: Price & View Experts CTA -->
+                <div class="px-4 pb-4 pt-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted text-uppercase d-block" style="font-size: 0.68rem; font-weight: 700; letter-spacing: 0.5px;">Starting from</span>
+                        <span class="fs-5 fw-bold text-dark">{{ s.price }}</span>
                     </div>
-                    <a href="/service/{{ s.key }}/providers" class="btn btn-custom-primary w-100 fw-semibold py-2">
-                        {{ t.view_experts }}
+                    <a href="/service/{{ s.key }}/providers" class="btn btn-choose btn-sm rounded-pill px-3 py-2">
+                        View Experts & Choose →
                     </a>
                 </div>
-
             </div>
         </div>
         {% else %}
         <div class="col-12 text-center py-5">
-            <p class="text-muted">No services found matching your query.</p>
+            <p class="text-muted fs-5">Abhi koi service uplabdh nahi hai.</p>
         </div>
         {% endfor %}
     </div>
 
+    <!-- Empty Search State -->
+    <div id="noMatchFound" class="text-center py-5 d-none">
+        <div class="display-6 mb-2">🔍</div>
+        <h5 class="fw-bold text-dark">Koi matching service nahi mili</h5>
+        <p class="text-muted small">Doosra keyword search karke dekhein (jaise: Electrician, Car wash, Cleaning)</p>
+    </div>
 </div>
+
+<!-- Instant Live Search Filter Script -->
 <script>
-function filterServices() {
-    let input = document.getElementById('serviceSearchInput').value.toLowerCase();
-    let cards = document.querySelectorAll('.col-md-6');
-    cards.forEach(card => {
-        let text = card.innerText.toLowerCase();
-        if (text.includes(input)) {
-            card.style.display = "";
-        } else {
-            card.style.display = "none";
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("liveSearchInput");
+        const serviceCols = document.querySelectorAll(".service-col");
+        const noMatch = document.getElementById("noMatchFound");
+
+        if (searchInput) {
+            searchInput.addEventListener("input", function () {
+                const query = this.value.trim().toLowerCase();
+                let matches = 0;
+
+                serviceCols.forEach(col => {
+                    const title = col.getAttribute("data-title") || "";
+                    const cat = col.getAttribute("data-category") || "";
+                    const desc = col.getAttribute("data-desc") || "";
+
+                    if (title.includes(query) || cat.includes(query) || desc.includes(query)) {
+                        col.classList.remove("d-none");
+                        matches++;
+                    } else {
+                        col.classList.add("d-none");
+                    }
+                });
+
+                if (matches === 0) {
+                    noMatch.classList.remove("d-none");
+                } else {
+                    noMatch.classList.add("d-none");
+                }
+            });
         }
     });
-}
 </script>
 {% endblock %}
